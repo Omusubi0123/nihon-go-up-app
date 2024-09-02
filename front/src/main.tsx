@@ -1,10 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Router basename={import.meta.env.DEV ? "/" : "team1"}>
+      <Routes>
+        <Route path="/" element={<App />} />
+      </Routes>
+    </Router>
+  </React.StrictMode>,
 )
