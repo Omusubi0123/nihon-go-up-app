@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button, VStack, Text, useToast } from '@chakra-ui/react';
 import axios from 'axios';
 
@@ -7,7 +6,7 @@ const App = () => {
 
   const handleClick = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/');
+      const response = await axios.get(import.meta.env.VITE_FASTAPI_URL);
       console.log("Success:", response.data);
     } catch (error) {
       console.error('Error:', error);
