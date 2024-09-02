@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build && mv dist ../docs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "git": "git add ../docs/ && git commit && git push",
+    "git": "git add ../docs/ && git commit && git push"
   },
   "dependencies": {
     "react": "^18.3.1",
