@@ -1,9 +1,7 @@
-import { Button, VStack, Text, useToast } from '@chakra-ui/react';
+import { Button, VStack, Text } from '@chakra-ui/react';
 import axios from 'axios';
 
 const App = () => {
-  const toast = useToast();
-
   const handleClick = async () => {
     try {
       const response = await axios.get(import.meta.env.VITE_FASTAPI_URL);
