@@ -39,7 +39,7 @@ def create_body(prompt: str, image_path: str | None = None) -> str:
 
 
 def aws_bedrock_call(prompt: str, image_path: str | None = None):
-    session = boto3.Session(profile_name="llm-user009")
+    session = boto3.Session(profile_name="llm-user011")
     client = session.client(service_name="bedrock-runtime", region_name="us-east-1")
 
     response = client.invoke_model_with_response_stream(
@@ -63,5 +63,5 @@ def aws_bedrock_call(prompt: str, image_path: str | None = None):
 
 if __name__ == "__main__":
     prompt = "画像の状況を、大正の文豪のような文章で表現してください。"
-    image_path = "data/osinoko.jpeg"
+    image_path = "/Users/andohikaru/Desktop/情報理工ハッカソン/FastAPI_sample/app/data/ando.jpeg"
     aws_bedrock_call(prompt, image_path)

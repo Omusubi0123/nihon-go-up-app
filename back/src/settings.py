@@ -21,4 +21,6 @@ class Settings(BaseSettings):
     azure_ai_search_endpoint: str = Field(..., env="AZURE_AI_SEARCH_ENDPOINT")
     azure_ai_search_api_key: str = Field(..., env="AZURE_AI_SEARCH_API_KEY")
 
+    azure_openai_version: str = Field(..., env="AZURE_OPENAI_VERSION")
+
     model_config = SettingsConfigDict(env_file=".env")
