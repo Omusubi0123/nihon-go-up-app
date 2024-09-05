@@ -6,6 +6,7 @@ const App = () => {
 
   const handleClick = async () => {
     try {
+      console.log(console.log('Fetching URL:', import.meta.env.VITE_FASTAPI_URL + 'cotomi/'));
       const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'cotomi/', {
         method: 'POST',
         headers: {
@@ -13,6 +14,7 @@ const App = () => {
         },
         body: JSON.stringify({ prompt: "リコリコの第二シリーズの情報を教えて下さい" })
       });
+      console.log("Response:", response);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
