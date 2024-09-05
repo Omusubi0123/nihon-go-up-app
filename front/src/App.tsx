@@ -7,7 +7,7 @@ const App = () => {
   const handleClick = async () => {
     try {
       console.log(console.log('Fetching URL:', import.meta.env.VITE_FASTAPI_URL + 'cotomi/'));
-      const response = await fetch("https://my-fastapi-app-422440879565.asia-northeast1.run.app/", {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'cotomi/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
