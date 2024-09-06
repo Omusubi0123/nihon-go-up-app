@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build && mv dist ../docs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "git": "git add ../docs/ && git commit && git push"
+    "deploy": "yarn run build && gh-pages -d ../docs -m 'Updates --skip-ci' && rm -rf ../docs"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
@@ -17,6 +17,7 @@
     "@emotion/styled": "^11.13.0",
     "axios": "^1.7.7",
     "framer-motion": "^11.3.31",
+    "gh-pages": "^6.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1"
