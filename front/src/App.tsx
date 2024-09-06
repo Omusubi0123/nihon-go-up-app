@@ -36,7 +36,7 @@ const App = () => {
   return (
     <VStack spacing={4} align="center" justify="center" height="100vh">
       <Text fontSize="xl">{text || "Click the button to call the API"}</Text>
-      <Button colorScheme="teal" onClick={handleClick}>
+      <Button colorScheme="blue" size="lg" onClick={handleClick}>
         Call API
       </Button>
     </VStack>
