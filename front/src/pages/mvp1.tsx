@@ -1,4 +1,4 @@
-import { Button, VStack, HStack, Box, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from '@chakra-ui/react';
+import { Button, VStack, HStack, Box, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Image } from '@chakra-ui/react';
 import { useState } from 'react';
 
 export default function mvp1() {
@@ -6,36 +6,107 @@ export default function mvp1() {
   const [text, setText] = useState("");
   const [convertedText, setConvertedText] = useState("");
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
+  const [imageSrc, setImageSrc] = useState(""); // 選択された画像のURL
+  const [imageExtension, setImageExtension] = useState(""); // 選択された画像の拡張子
+
+  const convertImageToBase64 = (imageSrc: string, callback: (base64String: string) => void) => {
+    const img = new window.Image(); // ブラウザの組み込みImageオブジェクトを使用
+    img.src = imageSrc;
+    
+    img.onload = () => {
+      // Canvasを作成して画像を描画
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        // Base64形式に変換
+        const base64String = canvas.toDataURL('image/png');
+        callback(base64String);
+      }
+    };
+  };
+
   const handleClick = async () => {
     try {
-      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'convert/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ raw_text: inputText, mode:"easy" })
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder("utf-8");
-      while (true) {
-        const { done, value } = await reader?.read()!;
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        setConvertedText((prev) => prev + chunk);
+      if (inputText) {
+        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'convert/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ raw_text: inputText, mode: "easy" })
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder("utf-8");
+        while (true) {
+          const { done, value } = await reader?.read()!;
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          setConvertedText((prev) => prev + chunk);
+        }
+      } else if (imageSrc) {
+        convertImageToBase64(imageSrc, async (base64String) => {
+
+          const formData = new FormData();
+          formData.append('image', base64String);
+          console.log(typeof(formData.get('image')));
+          console.log(formData.get('image'));
+          formData.append('text', inputText);
+
+          const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'ocr/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ image: imageSrc, type: "easy", extension: imageExtension })
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const reader = response.body?.getReader();
+          const decoder = new TextDecoder("utf-8");
+          while (true) {
+            const { done, value } = await reader?.read()!;
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            setConvertedText((prev) => prev + chunk);
+          }
+        }
+      )} else {
+        console.error('No input text.');
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
-  
+
   const handleModalSubmit = () => {
     setText(inputText);  // 入力されたテキストを反映
+    setImageSrc("");  // 画像を削除
+    setImageExtension("");  // 画像の拡張子を削除
     onClose();  // モーダルを閉じる
   };
 
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImageExtension(file.name.split('.').pop());
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageSrc(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      setText("");
+    }
+  };
+
+  
   return (
     <HStack spacing={0} align="stretch" height="100vh">
       <VStack
@@ -48,20 +119,31 @@ export default function mvp1() {
         <Button width="100%" colorScheme="blue" size="lg" onClick={onOpen}>
           文章を入力する
         </Button>
-        <Button width="100%" colorScheme="blue" size="lg">
+        <Input
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          id="uploadImage"
+          onChange={handleImageUpload}
+        />
+        <Button width="100%" colorScheme="blue" size="lg" onClick={() => document.getElementById('uploadImage')?.click()}>
           画像をアップロード
-        </Button>
-        <Button width="100%" colorScheme="blue" size="lg">
-          PDFをアップロード
         </Button>
         <Button width="100%" colorScheme="blue" size="lg" onClick={handleClick}>
           文章変換
         </Button>
       </VStack>
       <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
-        <Box flex="1" p={4}>
-          <Text fontSize="xl">{text || ""}</Text>
-        </Box>
+        {inputText != "" && (
+          <Box flex="1" p={4}>
+            <Text fontSize="xl">{text || ""}</Text>
+          </Box>          
+        )}
+        {imageSrc && (
+          <Box flex="1" p={4}>
+            <Image src={imageSrc} alt="Uploaded" height="400px" objectFit="cover" />
+          </Box>
+        )}
         <Box flex="1" p={4}>
           <Text fontSize="xl">{convertedText || ""}</Text>
         </Box>
