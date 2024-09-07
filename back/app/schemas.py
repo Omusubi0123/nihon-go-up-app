@@ -26,5 +26,5 @@ class TextComplexity(BaseModel):
 
 class ImageData(BaseModel):
     image: UploadFile = File(...)
-    mediatype: str = Form(...)
-    text: str = Form(...)
+    mediatype: str
+    text: str
