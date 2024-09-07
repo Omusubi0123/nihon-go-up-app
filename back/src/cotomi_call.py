@@ -1,9 +1,11 @@
+from typing import Generator, Literal
+
 from openai import OpenAI
 
 from src.settings import Settings
 
 
-def cotomi_call(prompt: str):
+def cotomi_call(messages: list[dict]) -> Generator[str, None, None]:
     settings = Settings()
 
     client = OpenAI(
@@ -13,7 +15,7 @@ def cotomi_call(prompt: str):
 
     response = client.chat.completions.create(
         model=settings.cotomi_model,
-        messages=[{"role": "user", "content": prompt}],
+        messages=messages,
         temperature=0.7,  # 出力のランダム度合い(可変)
         max_tokens=2000,  # 最大トークン数(固定)
         top_p=0.95,  # 予測する単語を上位何%からサンプリングするか(可変)

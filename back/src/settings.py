@@ -22,4 +22,7 @@ class Settings(BaseSettings):
     azure_ai_search_endpoint: str = Field(..., env="AZURE_AI_SEARCH_ENDPOINT")
     azure_ai_search_api_key: str = Field(..., env="AZURE_AI_SEARCH_API_KEY")
 
+    azure_embedding_modelname: str = Field(..., env="AZURE_EMBEDDING_MODELNAME")
+    azure_embedding_api_key: str = Field(..., env="AZURE_EMBEDDING_API_KEY")
+
     model_config = SettingsConfigDict(env_file=".env")
