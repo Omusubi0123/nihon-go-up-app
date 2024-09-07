@@ -1,4 +1,4 @@
-VOCAB_EASY_PROMPT = """
+CONVERT_VOCABULARY_PROMPT = """
 あなたは世界一優秀な語学学者です。古今東西の日本語に非常に精通していて、どんな文章も瞬時に理解できます。
 
 ## 課題
