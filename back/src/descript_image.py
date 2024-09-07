@@ -18,18 +18,17 @@ def create_body(b64_image_data: bytes) -> str:
     messages = [
         {"role": "user", "content": [{"type": "text", "text": DESCRIPT_IMAGE_PROMPT}]},
     ]
-    if image_path:
-        b64_image_data = local_image_to_data(image_path)
-        messages[0]["content"].append(
-            {
-                "type": "image",
-                "source": {
-                    "type": "base64",
-                    "media_type": "image/jpeg",
-                    "data": b64_image_data,
-                },
-            }
-        )
+    b64_image_data = local_image_to_data(image_path)
+    messages[0]["content"].append(
+        {
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": "image/jpeg",
+                "data": b64_image_data,
+            },
+        }
+    )
     body = json.dumps(
         {
             "anthropic_version": "bedrock-2023-05-31",
