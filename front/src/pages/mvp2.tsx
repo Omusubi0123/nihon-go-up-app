@@ -7,6 +7,7 @@ export default function Mvp2() {
   const { isOpen: isOpenModal1, onOpen: onOpenModal1, onClose: onCloseModal1 } = useDisclosure(); // モーダルの制御
   const { isOpen: isOpenModal2, onOpen: onOpenModal2, onClose: onCloseModal2 } = useDisclosure(); // モーダルの制御
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
+  const [inputTextForRAG, setInputTextForRAG] = useState(""); // モーダル内で入力されたテキスト
   const [imageSrc, setImageSrc] = useState<File | undefined>(undefined);
   const [componentImageSrc, setComponentImageSrc] = useState<File | undefined>(undefined);
   const [imageExtension, setImageExtension] = useState<string | null>(null); // 画像の拡張子を格納
@@ -52,35 +53,19 @@ export default function Mvp2() {
 
   const handleModalSubmitRAG = async () => {
     try {
-      if (componentImageSrc && inputText && imageExtension) {
-        const formData = new FormData();
-        const file = new Blob([componentImageSrc], { type: "image/png" });
-        const fileName = "sample.png";
-        
-        formData.append('image', file, fileName);
-        formData.append('text', "aiueo");
-        formData.append('mediatype', "png");
-    
-        const requestOptions = {
-          method: "POST",
-          body: formData,
-        };
-        
-        console.log("API呼び出し");
-        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'descript/', requestOptions);
-        console.log(response);
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder("utf-8");
-        while (true) {
-          const { done, value } = await reader?.read()!;
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          setConvertedText((prev) => prev + chunk);
-        }
-  
-        setImageSrc(componentImageSrc);
-        onCloseModal2();
-      }
+
+      const response = await fetch(
+        import.meta.env.VITE_FASTAPI_URL + 'ai_search/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: inputTextForRAG })
+      });
+      const data = await response.json();
+      
+      console.log(data);
+      
     } catch (error) {
       console.error("There was an error!", error);
     }
@@ -178,8 +163,8 @@ export default function Mvp2() {
           <ModalBody>
             <Input
               placeholder="文章をここに入力"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              value={inputTextForRAG}
+              onChange={(e) => setInputTextForRAG(e.target.value)}
             />
           </ModalBody>
           <ModalFooter>
