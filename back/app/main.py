@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import cotomi_routes, item_routes, user_routes
+from app.routes import cotomi_routes, flex_text_routers, item_routes, user_routes
 
 app = FastAPI()
 
 app.include_router(item_routes.router, prefix="/items")
 app.include_router(user_routes.router, prefix="/users")
 app.include_router(cotomi_routes.router, prefix="/cotomi")
+app.include_router(flex_text_routers.router, prefix="/convert")
 
 app.add_middleware(
     CORSMiddleware,
