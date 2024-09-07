@@ -1,7 +1,47 @@
-import { Button, VStack, HStack, Box, Image as ChakraImage, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Center } from '@chakra-ui/react';
+import {
+  Button,
+  VStack,
+  HStack,
+  Box,
+  Text,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Input,
+  Image,
+  Textarea,
+  Center,
+} from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 
-
+const imagePaths = [
+  'data/1.jpeg',
+  'data/11.jpeg',
+  'data/13.jpeg',
+  'data/15.jpeg',
+  'data/17.jpeg',
+  'data/19.jpeg',
+  'data/20.jpeg',
+  'data/22.jpeg',
+  'data/3.jpeg',
+  'data/5.jpeg',
+  'data/7.jpeg',
+  'data/9.jpeg',
+  'data/12.jpeg',
+  'data/14.jpeg',
+  'data/16.jpeg',
+  'data/18.jpeg',
+  'data/2.jpeg',
+  'data/21.jpeg',
+  'data/23.jpeg',
+  'data/4.jpeg',
+  'data/6.jpeg',
+  'data/8.jpeg',
+];
 
 export default function Mvp2() {
   const { isOpen: isOpenModal1, onOpen: onOpenModal1, onClose: onCloseModal1 } = useDisclosure(); // モーダルの制御
@@ -114,7 +154,7 @@ export default function Mvp2() {
       <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
         {imageSrc && (
           <Box flex="1" p={4}>
-            <ChakraImage src={imageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
+            <Image src={imageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
           </Box>
         )}
         <Box flex="1" p={4}>
@@ -134,7 +174,7 @@ export default function Mvp2() {
             </Center>
             {componentImageSrc && (
               <Box flex="1" p={4}>
-                <ChakraImage src={componentImageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
+                <Image src={componentImageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
               </Box>
             )}
           </ModalBody>
@@ -157,8 +197,23 @@ export default function Mvp2() {
       {/* モーダル2 */}
       <Modal isOpen={isOpenModal2} onClose={onCloseModal2}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent maxWidth={"50vw"}>
           <ModalHeader>画像を選択してください</ModalHeader>
+          <ModalBody>
+            <Box display="flex" flexWrap="wrap">
+              {imagePaths.map((path, index) => (
+                <Box key={index} p={2}>
+                  <Image
+                    src={path}
+                    alt={`image-${index}`}
+                    boxSize="100px"
+                    objectFit="cover"
+                    borderRadius="md"
+                  />
+                </Box>
+              ))}
+            </Box>
+          </ModalBody>
           <ModalHeader>文章を入力してください</ModalHeader>
           <ModalBody>
             <Input
