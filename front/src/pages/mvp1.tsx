@@ -1,4 +1,19 @@
-import { Button, VStack, HStack, Box, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Image } from '@chakra-ui/react';
+import {
+  Button,
+  VStack,
+  HStack,
+  Box,
+  Text,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Input,
+  Image
+} from '@chakra-ui/react';
 import { useState } from 'react';
 
 export default function mvp1() {
@@ -8,6 +23,8 @@ export default function mvp1() {
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
   const [imageSrc, setImageSrc] = useState(""); // 選択された画像のURL
   const [imageExtension, setImageExtension] = useState(""); // 選択された画像の拡張子
+  const [selectedText, setSelectedText] = useState(""); // 選択されたテキスト
+  const [isTextModalOpen, setIsTextModalOpen] = useState(false); // テキスト表示用モーダルの制御
 
   const convertImageToBase64 = (imageSrc: string, callback: (base64String: string) => void) => {
     const img = new window.Image(); // ブラウザの組み込みImageオブジェクトを使用
@@ -52,11 +69,8 @@ export default function mvp1() {
         }
       } else if (imageSrc) {
         convertImageToBase64(imageSrc, async (base64String) => {
-
           const formData = new FormData();
           formData.append('image', base64String);
-          console.log(typeof(formData.get('image')));
-          console.log(formData.get('image'));
           formData.append('text', inputText);
 
           const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'ocr/', {
@@ -77,8 +91,8 @@ export default function mvp1() {
             const chunk = decoder.decode(value, { stream: true });
             setConvertedText((prev) => prev + chunk);
           }
-        }
-      )} else {
+        });
+      } else {
         console.error('No input text.');
       }
     } catch (error) {
@@ -106,7 +120,15 @@ export default function mvp1() {
     }
   };
 
-  
+  // テキストの選択処理
+  const handleTextSelection = () => {
+    const selectedText = window.getSelection()?.toString() || "";
+    if (selectedText) {
+      setSelectedText(selectedText);
+      setIsTextModalOpen(true);
+    }
+  };
+
   return (
     <HStack spacing={0} align="stretch" height="100vh">
       <VStack
@@ -134,7 +156,7 @@ export default function mvp1() {
         </Button>
       </VStack>
       <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
-        {inputText != "" && (
+        {inputText !== "" && (
           <Box flex="1" p={4}>
             <Text fontSize="xl">{text || ""}</Text>
           </Box>          
@@ -144,10 +166,27 @@ export default function mvp1() {
             <Image src={imageSrc} alt="Uploaded" height="400px" objectFit="cover" />
           </Box>
         )}
-        <Box flex="1" p={4}>
-          <Text fontSize="xl">{convertedText || ""}</Text>
-        </Box>
+        {convertedText && (
+          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text">
+            <Text fontSize="xl">{convertedText || ""}</Text>
+          </Box>
+        )}
       </VStack>
+      {/* テキスト選択用モーダル */}
+      <Modal isOpen={isTextModalOpen} onClose={() => setIsTextModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>選択されたテキスト</ModalHeader>
+          <ModalBody>
+            <Text>{selectedText}</Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={() => setIsTextModalOpen(false)}>
+              閉じる
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       {/* モーダル */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
