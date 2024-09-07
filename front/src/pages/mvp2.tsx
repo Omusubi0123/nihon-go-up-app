@@ -58,12 +58,14 @@ export default function Mvp2() {
     try {
       if (componentImageSrc && inputText && imageExtension) {
         const formData = new FormData();
-        const file = new Blob([componentImageSrc], { type: "image/png" });
+        console.log(componentImageSrc);
+        const file = new Blob([componentImageSrc], { type: `image/${imageExtension}` });
         const fileName = "sample.png";
         
         formData.append('image', file, fileName);
-        formData.append('text', "aiueo");
-        formData.append('mediatype', "png");
+        formData.append('text', inputText);
+        formData.append('mediatype', imageExtension);
+        console.log(formData);
     
         const requestOptions = {
           method: "POST",
@@ -154,7 +156,7 @@ export default function Mvp2() {
       <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
         {imageSrc && (
           <Box flex="1" p={4}>
-            <Image src={imageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
+            <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded Image" maxH="300px" objectFit="contain" />
           </Box>
         )}
         <Box flex="1" p={4}>
@@ -174,7 +176,7 @@ export default function Mvp2() {
             </Center>
             {componentImageSrc && (
               <Box flex="1" p={4}>
-                <Image src={componentImageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
+                <Image src={URL.createObjectURL(componentImageSrc)} alt="Uploaded Image" maxH="300px" objectFit="contain" />
               </Box>
             )}
           </ModalBody>

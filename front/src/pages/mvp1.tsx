@@ -15,7 +15,7 @@ import {
   Image,
   Textarea,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 export default function mvp1() {
@@ -24,30 +24,12 @@ export default function mvp1() {
   const [convertedText, setConvertedText] = useState("");
   const [detailText, setDetailText] = useState("");
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
-  const [imageSrc, setImageSrc] = useState(""); // 選択された画像のURL
+  const [imageSrc, setImageSrc] = useState<File | undefined>(undefined);
   const [imageExtension, setImageExtension] = useState(""); // 選択された画像の拡張子
   const [selectedText, setSelectedText] = useState(""); // 選択されたテキスト
   const [isTextModalOpen, setIsTextModalOpen] = useState(false); // テキスト表示用モーダルの制御
-
-  const convertImageToBase64 = (imageSrc: string, callback: (base64String: string) => void) => {
-    const img = new window.Image(); // ブラウザの組み込みImageオブジェクトを使用
-    img.src = imageSrc;
-    
-    img.onload = () => {
-      // Canvasを作成して画像を描画
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        
-        // Base64形式に変換
-        const base64String = canvas.toDataURL('image/png');
-        callback(base64String);
-      }
-    };
-  };
+  const [componentImageSrc, setComponentImageSrc] = useState<File | undefined>(undefined);
+  const inputFileRef = useRef<HTMLInputElement | null>(null); // ファイル選択の参照
 
   const handleClick = async () => {
     try {
@@ -70,31 +52,28 @@ export default function mvp1() {
           const chunk = decoder.decode(value, { stream: true });
           setConvertedText((prev) => prev + chunk);
         }
-      } else if (imageSrc) {
-        convertImageToBase64(imageSrc, async (base64String) => {
-          const formData = new FormData();
-          formData.append('image', base64String);
-          formData.append('text', inputText);
+      } else if (imageExtension && componentImageSrc) {
+        const formData = new FormData();
+        // const file = new Blob([componentImageSrc], { type: `image/${imageExtension}` });
+        const file = new Blob([componentImageSrc], { type: `image/${imageExtension}` });
+        const fileName = "sample.png";
+        formData.append('image', file, fileName);
+        formData.append('mediatype', imageExtension);
+        const requestOptions = {
+          method: "POST",
+          body: formData,
+        };
 
-          const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'ocr/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ image: imageSrc, type: "easy", extension: imageExtension })
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const reader = response.body?.getReader();
-          const decoder = new TextDecoder("utf-8");
-          while (true) {
-            const { done, value } = await reader?.read()!;
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            setDetailText((prev) => prev + chunk);
-          }
-        });
+        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'ocr/', requestOptions);
+        console.log("response: ", response);
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder("utf-8");
+        while (true) {
+          const { done, value } = await reader?.read()!;
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          setConvertedText((prev) => prev + chunk);
+        }
       } else {
         console.error('No input text.');
       }
@@ -102,6 +81,9 @@ export default function mvp1() {
       console.error('Error:', error);
     }
   };
+
+
+
 
   const handleGetDetail = async () => {
     try {
@@ -135,18 +117,20 @@ export default function mvp1() {
     onClose();  // モーダルを閉じる
   };
 
-  
+  const handleUploadClick = () => {
+    if (inputFileRef.current) {
+      inputFileRef.current.click();
+    }
+  };
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
-      setImageExtension(file.name.split('.').pop());
+      setImageExtension(file.name.split('.').pop() ?? 'unknown');
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageSrc(reader.result as string);
-      };
+      setComponentImageSrc(file);
+      setImageSrc(file);
       reader.readAsDataURL(file);
-      setText("");
     }
   };
 
@@ -158,11 +142,15 @@ export default function mvp1() {
       setIsTextModalOpen(true);
     }
   };
+  
 
   const handleCloseModal = () => {
     setDetailText("");
     setIsTextModalOpen(false);
   };
+
+
+  
 
   return (
     <HStack spacing={0} align="stretch" height="100vh">
@@ -173,6 +161,14 @@ export default function mvp1() {
         align="start"
         spacing={4}
       >
+        {/* 隠れたファイル選択ボタン */}
+        <input
+          type="file"
+          accept="image/*"
+          ref={inputFileRef}
+          style={{ display: 'none' }} // inputを非表示にする
+          onChange={handleFileChange}
+        />
         <Button width="100%" colorScheme="blue" size="lg" onClick={onOpen}>
           文章を入力する
         </Button>
@@ -181,9 +177,9 @@ export default function mvp1() {
           accept="image/*"
           style={{ display: 'none' }}
           id="uploadImage"
-          onChange={handleImageUpload}
+          onChange={handleFileChange}
         />
-        <Button width="100%" colorScheme="blue" size="lg" onClick={() => document.getElementById('uploadImage')?.click()}>
+        <Button width="100%" colorScheme="blue" size="lg" onClick={handleUploadClick}>
           画像をアップロード
         </Button>
         <Button width="100%" colorScheme="blue" size="lg" onClick={handleClick}>
@@ -198,7 +194,7 @@ export default function mvp1() {
         )}
         {imageSrc && (
           <Box flex="1" p={4}>
-            <Image src={imageSrc} alt="Uploaded" height="400px" objectFit="cover" />
+            <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded" height="400px" objectFit="cover" />
           </Box>
         )}
         {convertedText && (
