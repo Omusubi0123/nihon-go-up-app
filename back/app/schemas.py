@@ -21,10 +21,9 @@ class Text(BaseModel):
 
 class TextComplexity(BaseModel):
     raw_text: str
-    mode: Literal["easy", "hard", "term"]
+    mode: Literal["easy", "hard"]
 
 
 class ImageData(BaseModel):
     image: UploadFile = File(...)
     mediatype: str
-    text: str

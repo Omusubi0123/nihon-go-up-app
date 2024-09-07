@@ -49,17 +49,15 @@ def create_body(
     return body
 
 
-def llm_process_image(
-    b64_image_data: bytes,
-    mediatype: Literal["jpeg", "png"],
-    mode: Literal["descript", "ocr"],
+def aws_bedrock_call(
+    body: str,
 ) -> Generator[str, None, None]:
     settings = Settings()
     session = boto3.Session(profile_name=settings.aws_username)
     client = session.client(service_name="bedrock-runtime", region_name="us-east-1")
     response = client.invoke_model_with_response_stream(
         modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
-        body=create_body(b64_image_data, mediatype, mode),
+        body=body,
     )
     stream = response.get("body")
     if stream:
@@ -77,10 +75,7 @@ def llm_process_image(
 if __name__ == "__main__":
     import sys
 
-    # image_path = "data/landscape.png"
-    # b64_image_data = local_image_to_data(image_path)
-    # descript_image(b64_image_data, mediatype="png", mode="descript")
-
     image_path = "data/kakudai.png"
     b64_image_data = local_image_to_data(image_path)
-    llm_process_image(b64_image_data, mediatype="png", mode="ocr")
+    body = create_body(b64_image_data, "png", "ocr")
+    aws_bedrock_call(body)
