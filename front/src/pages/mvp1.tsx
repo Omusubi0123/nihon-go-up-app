@@ -1,6 +1,7 @@
 import { Button, VStack, HStack, Box, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from '@chakra-ui/react';
 import { useState } from 'react';
-const App = () => {
+
+export default function mvp1() {
   const { isOpen, onOpen, onClose } = useDisclosure(); // モーダルの制御
   const [text, setText] = useState("");
   const [convertedText, setConvertedText] = useState("");
@@ -86,4 +87,3 @@ const App = () => {
     </HStack>
   );
 };
-export default App;
