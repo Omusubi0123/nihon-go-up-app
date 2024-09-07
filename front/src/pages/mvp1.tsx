@@ -12,7 +12,8 @@ import {
   ModalBody,
   ModalFooter,
   Input,
-  Image
+  Image,
+  Textarea,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 
@@ -231,10 +232,13 @@ export default function mvp1() {
         <ModalContent>
           <ModalHeader>文章を入力してください</ModalHeader>
           <ModalBody>
-            <Input
+            <Textarea
               placeholder="文章をここに入力"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
+              size="lg"
+              resize="vertical"  // 必要に応じてリサイズを許可
+              rows={10}  // 行数を指定
             />
           </ModalBody>
           <ModalFooter>
