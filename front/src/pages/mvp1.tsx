@@ -186,6 +186,7 @@ export default function mvp1() {
           文章変換
         </Button>
       </VStack>
+      {/* 右側の要素 */}
       <Box p={10} display="flex" flexDirection="row" justifyContent="space-between">
         {inputText !== "" && (
           <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" mr={4}>
