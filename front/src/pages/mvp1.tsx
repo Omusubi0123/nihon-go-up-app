@@ -19,8 +19,8 @@ import { useState } from 'react';
 
 export default function mvp1() {
   const { isOpen, onOpen, onClose } = useDisclosure(); // モーダルの制御
-  const [text, setText] = useState("");
-  const [convertedText, setConvertedText] = useState("");
+  const [text, setText] = useState("日々の生活は忙しさに満ちていますが、時折立ち止まって自分自身と向き合うことが大切です。忙しい日常の中で見過ごしがちな小さな喜びや、他者とのふれあいを大切にしましょう。時間に追われる中でも、心の余裕を持つことで、自分の目標や夢に向かって確実に前進することができます。自己成長や人間関係の発展には、継続的な努力と、時には一息つくことが必要です。");
+  const [convertedText, setConvertedText] = useState("日々の生活は忙しさに満ちていますが、時折立ち止まって自分自身と向き合うことが大切です。忙しい日常の中で見過ごしがちな小さな喜びや、他者とのふれあいを大切にしましょう。時間に追われる中でも、心の余裕を持つことで、自分の目標や夢に向かって確実に前進することができます。自己成長や人間関係の発展には、継続的な努力と、時には一息つくことが必要です。");
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
   const [imageSrc, setImageSrc] = useState(""); // 選択された画像のURL
   const [imageExtension, setImageExtension] = useState(""); // 選択された画像の拡張子
@@ -187,10 +187,11 @@ export default function mvp1() {
           文章変換
         </Button>
       </VStack>
+      <Box p={10} display="flex" flexDirection="row" justifyContent="space-between">
         {inputText !== "" && (
-          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text">
+          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" mr={4}>
             <Text fontSize="xl">{text || ""}</Text>
-          </Box>          
+          </Box>
         )}
         {imageSrc && (
           <Box flex="1" p={4}>
@@ -198,10 +199,13 @@ export default function mvp1() {
           </Box>
         )}
         {convertedText && (
-          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text">
-            <Text fontSize="xl">{convertedText || ""}</Text>
+          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+            <Text fontSize="xl">
+              {convertedText || ""}
+            </Text>
           </Box>
         )}
+      </Box>
       {/* テキスト選択用モーダル */}
       <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
         <ModalOverlay />
