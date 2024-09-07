@@ -12,9 +12,9 @@ import {
   ModalBody,
   ModalFooter,
   Input,
-  Image,
   Textarea,
   Center,
+  Image,
 } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 
@@ -145,10 +145,10 @@ export default function Mvp2() {
           onChange={handleFileChange}
         />
         <Button width="100%" colorScheme="blue" size="lg" onClick={onOpenModal1}>
-          好きな画像に対して説明
+          画像説明モード1
         </Button>
         <Button width="100%" colorScheme="blue" size="lg" onClick={onOpenModal2}>
-          10枚の中から画像を説明
+          画像説明モード2
         </Button>
       </VStack>
       <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
@@ -180,10 +180,13 @@ export default function Mvp2() {
           </ModalBody>
           <ModalHeader>文章を入力してください</ModalHeader>
           <ModalBody>
-            <Input
+            <Textarea
               placeholder="文章をここに入力"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
+              size="lg"
+              resize="vertical"  // 必要に応じてリサイズを許可
+              rows={10}  // 行数を指定
             />
           </ModalBody>
           <ModalFooter>
@@ -216,14 +219,14 @@ export default function Mvp2() {
           </ModalBody>
           <ModalHeader>文章を入力してください</ModalHeader>
           <ModalBody>
-            <Input
+            <Textarea
               placeholder="文章をここに入力"
               value={inputTextForRAG}
               onChange={(e) => setInputTextForRAG(e.target.value)}
             />
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleModalSubmitRAG}>
+            <Button colorScheme="blue" mr={3} onClick={handleModalSubmit}>
               送信
             </Button>
             <Button variant="ghost" onClick={onCloseModal2}>キャンセル</Button>
