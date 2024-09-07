@@ -1,4 +1,19 @@
-import { Button, VStack, HStack, Box, Image as ChakraImage, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Center } from '@chakra-ui/react';
+import {
+  Button,
+  VStack,
+  HStack,
+  Box,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Textarea,
+  Center,
+  Image,
+} from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 
 
@@ -120,16 +135,16 @@ export default function Mvp2() {
           onChange={handleFileChange}
         />
         <Button width="100%" colorScheme="blue" size="lg" onClick={onOpenModal1}>
-          好きな画像に対して説明
+          画像説明モード1
         </Button>
         <Button width="100%" colorScheme="blue" size="lg" onClick={onOpenModal2}>
-          10枚の中から画像を説明
+          画像説明モード2
         </Button>
       </VStack>
       <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
         {imageSrc && (
           <Box flex="1" p={4}>
-            <ChakraImage src={imageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
+            <Image src={imageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
           </Box>
         )}
         <Box flex="1" p={4}>
@@ -149,16 +164,19 @@ export default function Mvp2() {
             </Center>
             {componentImageSrc && (
               <Box flex="1" p={4}>
-                <ChakraImage src={componentImageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
+                <Image src={componentImageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
               </Box>
             )}
           </ModalBody>
           <ModalHeader>文章を入力してください</ModalHeader>
           <ModalBody>
-            <Input
+            <Textarea
               placeholder="文章をここに入力"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
+              size="lg"
+              resize="vertical"  // 必要に応じてリサイズを許可
+              rows={10}  // 行数を指定
             />
           </ModalBody>
           <ModalFooter>
@@ -173,17 +191,20 @@ export default function Mvp2() {
       <Modal isOpen={isOpenModal2} onClose={onCloseModal2}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>画像を選択してください</ModalHeader>
+          <ModalHeader>モード2</ModalHeader>
           <ModalHeader>文章を入力してください</ModalHeader>
           <ModalBody>
-            <Input
+            <Textarea
               placeholder="文章をここに入力"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
+              size="lg"
+              resize="vertical"  // 必要に応じてリサイズを許可
+              rows={10}  // 行数を指定
             />
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleModalSubmitRAG}>
+            <Button colorScheme="blue" mr={3} onClick={handleModalSubmit}>
               送信
             </Button>
             <Button variant="ghost" onClick={onCloseModal2}>キャンセル</Button>

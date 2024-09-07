@@ -16,17 +16,18 @@ import {
   Textarea,
 } from '@chakra-ui/react';
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 export default function mvp1() {
   const { isOpen, onOpen, onClose } = useDisclosure(); // モーダルの制御
-  const [text, setText] = useState("日々の生活は忙しさに満ちていますが、時折立ち止まって自分自身と向き合うことが大切です。忙しい日常の中で見過ごしがちな小さな喜びや、他者とのふれあいを大切にしましょう。時間に追われる中でも、心の余裕を持つことで、自分の目標や夢に向かって確実に前進することができます。自己成長や人間関係の発展には、継続的な努力と、時には一息つくことが必要です。");
+  const [text, setText] = useState("");
   const [convertedText, setConvertedText] = useState("");
+  const [detailText, setDetailText] = useState("");
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
   const [imageSrc, setImageSrc] = useState(""); // 選択された画像のURL
   const [imageExtension, setImageExtension] = useState(""); // 選択された画像の拡張子
   const [selectedText, setSelectedText] = useState(""); // 選択されたテキスト
   const [isTextModalOpen, setIsTextModalOpen] = useState(false); // テキスト表示用モーダルの制御
-  const [detailText, setDetailText] = useState(""); // 単語の意味を格納
 
   const convertImageToBase64 = (imageSrc: string, callback: (base64String: string) => void) => {
     const img = new window.Image(); // ブラウザの組み込みImageオブジェクトを使用
@@ -104,7 +105,7 @@ export default function mvp1() {
 
   const handleGetDetail = async () => {
     try {
-      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'detail/', {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'meaning/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -120,7 +121,7 @@ export default function mvp1() {
         const { done, value } = await reader?.read()!;
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        setConvertedText((prev) => prev + chunk);
+        setDetailText((prev) => prev + chunk);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -133,6 +134,8 @@ export default function mvp1() {
     setImageExtension("");  // 画像の拡張子を削除
     onClose();  // モーダルを閉じる
   };
+
+  
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -216,7 +219,7 @@ export default function mvp1() {
           </ModalBody>
           {detailText && (
             <ModalBody>
-              <Text>{detailText}</Text>
+              <ReactMarkdown>{detailText}</ReactMarkdown>
             </ModalBody>
           )  
           }
