@@ -3,6 +3,7 @@ import { useState } from 'react';
 const App = () => {
   const { isOpen, onOpen, onClose } = useDisclosure(); // モーダルの制御
   const [text, setText] = useState("");
+  const [convertedText, setConvertedText] = useState("");
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
   const handleClick = async () => {
     try {
@@ -22,7 +23,7 @@ const App = () => {
         const { done, value } = await reader?.read()!;
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        setText((prev) => prev + chunk);
+        setConvertedText((prev) => prev + chunk);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -54,10 +55,14 @@ const App = () => {
           文章変換
         </Button>
       </VStack>
-      {/* コンテンツエリア */}
-      <Box flex="1" p={4}>
-        <Text fontSize="xl">{text || "テキストがここに表示されます"}</Text>
-      </Box>
+      <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
+        <Box flex="1" p={4}>
+          <Text fontSize="xl">{text || ""}</Text>
+        </Box>
+        <Box flex="1" p={4}>
+          <Text fontSize="xl">{convertedText || ""}</Text>
+        </Box>
+      </VStack>
       {/* モーダル */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -72,7 +77,7 @@ const App = () => {
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="blue" mr={3} onClick={handleModalSubmit}>
-              送信
+              決定
             </Button>
             <Button variant="ghost" onClick={onClose}>キャンセル</Button>
           </ModalFooter>
