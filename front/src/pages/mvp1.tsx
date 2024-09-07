@@ -1,13 +1,32 @@
-import { Button, VStack, HStack, Box, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Image } from '@chakra-ui/react';
+import {
+  Button,
+  VStack,
+  HStack,
+  Box,
+  Text,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Input,
+  Image,
+  Textarea,
+} from '@chakra-ui/react';
 import { useState } from 'react';
 
 export default function mvp1() {
   const { isOpen, onOpen, onClose } = useDisclosure(); // モーダルの制御
-  const [text, setText] = useState("");
-  const [convertedText, setConvertedText] = useState("");
+  const [text, setText] = useState("日々の生活は忙しさに満ちていますが、時折立ち止まって自分自身と向き合うことが大切です。忙しい日常の中で見過ごしがちな小さな喜びや、他者とのふれあいを大切にしましょう。時間に追われる中でも、心の余裕を持つことで、自分の目標や夢に向かって確実に前進することができます。自己成長や人間関係の発展には、継続的な努力と、時には一息つくことが必要です。");
+  const [convertedText, setConvertedText] = useState("日々の生活は忙しさに満ちていますが、時折立ち止まって自分自身と向き合うことが大切です。忙しい日常の中で見過ごしがちな小さな喜びや、他者とのふれあいを大切にしましょう。時間に追われる中でも、心の余裕を持つことで、自分の目標や夢に向かって確実に前進することができます。自己成長や人間関係の発展には、継続的な努力と、時には一息つくことが必要です。");
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
   const [imageSrc, setImageSrc] = useState(""); // 選択された画像のURL
   const [imageExtension, setImageExtension] = useState(""); // 選択された画像の拡張子
+  const [selectedText, setSelectedText] = useState(""); // 選択されたテキスト
+  const [isTextModalOpen, setIsTextModalOpen] = useState(false); // テキスト表示用モーダルの制御
+  const [detailText, setDetailText] = useState(""); // 単語の意味を格納
 
   const convertImageToBase64 = (imageSrc: string, callback: (base64String: string) => void) => {
     const img = new window.Image(); // ブラウザの組み込みImageオブジェクトを使用
@@ -52,11 +71,8 @@ export default function mvp1() {
         }
       } else if (imageSrc) {
         convertImageToBase64(imageSrc, async (base64String) => {
-
           const formData = new FormData();
           formData.append('image', base64String);
-          console.log(typeof(formData.get('image')));
-          console.log(formData.get('image'));
           formData.append('text', inputText);
 
           const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'ocr/', {
@@ -75,11 +91,36 @@ export default function mvp1() {
             const { done, value } = await reader?.read()!;
             if (done) break;
             const chunk = decoder.decode(value, { stream: true });
-            setConvertedText((prev) => prev + chunk);
+            setDetailText((prev) => prev + chunk);
           }
-        }
-      )} else {
+        });
+      } else {
         console.error('No input text.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleGetDetail = async () => {
+    try {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'detail/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: selectedText })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      while (true) {
+        const { done, value } = await reader?.read()!;
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        setConvertedText((prev) => prev + chunk);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -106,7 +147,20 @@ export default function mvp1() {
     }
   };
 
-  
+  // テキストの選択処理
+  const handleTextSelection = () => {
+    const selectedText = window.getSelection()?.toString() || "";
+    if (selectedText) {
+      setSelectedText(selectedText);
+      setIsTextModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setDetailText("");
+    setIsTextModalOpen(false);
+  };
+
   return (
     <HStack spacing={0} align="stretch" height="100vh">
       <VStack
@@ -133,31 +187,62 @@ export default function mvp1() {
           文章変換
         </Button>
       </VStack>
-      <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
-        {inputText != "" && (
-          <Box flex="1" p={4}>
+      <Box p={10} display="flex" flexDirection="row" justifyContent="space-between">
+        {inputText !== "" && (
+          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" mr={4}>
             <Text fontSize="xl">{text || ""}</Text>
-          </Box>          
+          </Box>
         )}
         {imageSrc && (
           <Box flex="1" p={4}>
             <Image src={imageSrc} alt="Uploaded" height="400px" objectFit="cover" />
           </Box>
         )}
-        <Box flex="1" p={4}>
-          <Text fontSize="xl">{convertedText || ""}</Text>
-        </Box>
-      </VStack>
+        {convertedText && (
+          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+            <Text fontSize="xl">
+              {convertedText || ""}
+            </Text>
+          </Box>
+        )}
+      </Box>
+      {/* テキスト選択用モーダル */}
+      <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>選択されたテキスト</ModalHeader>
+          <ModalBody>
+            <Text>{selectedText}</Text>
+          </ModalBody>
+          {detailText && (
+            <ModalBody>
+              <Text>{detailText}</Text>
+            </ModalBody>
+          )  
+          }
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={() => handleGetDetail()}>
+              単語の意味を調べる
+            </Button>
+            <Button colorScheme="blue" mr={3} onClick={() => handleCloseModal(false)}>
+              閉じる
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       {/* モーダル */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>文章を入力してください</ModalHeader>
           <ModalBody>
-            <Input
+            <Textarea
               placeholder="文章をここに入力"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
+              size="lg"
+              resize="vertical"  // 必要に応じてリサイズを許可
+              rows={10}  // 行数を指定
             />
           </ModalBody>
           <ModalFooter>
