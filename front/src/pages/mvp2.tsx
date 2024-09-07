@@ -58,7 +58,7 @@ export default function Mvp2() {
           console.log('Success:', result);
 
           setImageSrc(componentImageSrc);
-          onClose(); // モーダルを閉じる
+          onClose();
         });
       } else {
         console.error('No image selected.');
@@ -69,19 +69,19 @@ export default function Mvp2() {
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]; // ファイルの取得
+    const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setComponentImageSrc(reader.result as string); // 読み込んだ画像のURLをセット
+        setComponentImageSrc(reader.result as string);
       };
-      reader.readAsDataURL(file); // ファイルをデータURLとして読み込む
+      reader.readAsDataURL(file);
     }
   };
 
   const handleUploadClick = () => {
     if (inputFileRef.current) {
-      inputFileRef.current.click(); // inputのclickイベントをトリガー
+      inputFileRef.current.click();
     }
   };
 
