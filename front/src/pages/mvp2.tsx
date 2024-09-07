@@ -58,12 +58,14 @@ export default function Mvp2() {
     try {
       if (componentImageSrc && inputText && imageExtension) {
         const formData = new FormData();
-        const file = new Blob([componentImageSrc], { type: "image/png" });
+        console.log(componentImageSrc);
+        const file = new Blob([componentImageSrc], { type: `image/${imageExtension}` });
         const fileName = "sample.png";
         
         formData.append('image', file, fileName);
         formData.append('text', inputText);
         formData.append('mediatype', imageExtension);
+        console.log(formData);
     
         const requestOptions = {
           method: "POST",
