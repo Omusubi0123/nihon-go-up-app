@@ -6,6 +6,7 @@ export default function Mvp2() {
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
   const [imageSrc, setImageSrc] = useState<string | null>(null); // 画像のURLを格納
   const [componentImageSrc, setComponentImageSrc] = useState<string | null>(null); // 画像のURLを格納
+  const [imageExtension, setImageExtension] = useState<string | null>(null); // 画像の拡張子を格納
   const inputFileRef = useRef<HTMLInputElement | null>(null); // ファイル選択の参照
 
   // 画像データをBase64形式に変換する関数
@@ -44,6 +45,7 @@ export default function Mvp2() {
             body: JSON.stringify({
               b64_image_data: base64String,
               // text: inputText
+              extension: imageExtension
             }),
             headers: {
               'Content-Type': 'application/json'
@@ -71,6 +73,7 @@ export default function Mvp2() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageExtension(file.name.split('.').pop());
       const reader = new FileReader();
       reader.onloadend = () => {
         setComponentImageSrc(reader.result as string);
