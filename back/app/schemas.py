@@ -21,7 +21,7 @@ class Query(BaseModel):
 
 class TextComplexity(BaseModel):
     raw_text: str
-    mode: Literal["easy", "hard"]
+    mode: Literal["easy", "hard", "term"]
 
 
 class ImageData(BaseModel):

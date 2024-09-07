@@ -3,17 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import (
     ai_search_routers,
+    convert_text_routers,
     descript_routers,
-    flex_text_routers,
     ocr_routers,
+    term_and_mean_routers,
 )
 
 app = FastAPI()
 
 app.include_router(ai_search_routers.router, prefix="/ai_search")
-app.include_router(flex_text_routers.router, prefix="/convert")
+app.include_router(convert_text_routers.router, prefix="/convert")
+app.include_router(term_and_mean_routers.router, prefix="/meaning")
 app.include_router(descript_routers.router, prefix="/descript")
 app.include_router(ocr_routers.router, prefix="/ocr")
+
 
 app.add_middleware(
     CORSMiddleware,
