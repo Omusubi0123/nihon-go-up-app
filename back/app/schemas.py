@@ -21,3 +21,7 @@ class Cotomi(BaseModel):
 class TextComplexity(BaseModel):
     raw_text: str
     mode: str
+
+
+class Base64Image(BaseModel):
+    b64_image_data: bytes
