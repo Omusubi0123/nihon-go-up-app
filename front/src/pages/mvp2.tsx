@@ -75,6 +75,43 @@ export default function Mvp2() {
   const [convertedText, setConvertedText] = useState(""); // 変換後のテキストを格納
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [sortedImagePaths, setSortedImagePaths] = useState<string[]>(imagePaths); // ソートされた画像パスを保持
+  const [feedBackText, setFeedBackText] = useState("");
+
+
+  const getFeedbackWithImage = async () => {
+    try {
+      if (imageExtension && imageSrc) {
+        
+        const formData = new FormData();
+        const file = new Blob([imageSrc], { type: `image/${imageExtension}` });
+        const fileName = "sample.png";
+        formData.append('image', file, fileName);
+        formData.append('mediatype', imageExtension);
+        formData.append('llm_description', imageExtension);
+        formData.append('user_description', imageExtension);
+        const requestOptions = {
+          method: "POST",
+          body: formData,
+        };
+        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'compare/', requestOptions);
+        console.log("response: ", response);
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder("utf-8");
+        while (true) {
+          const { done, value } = await reader?.read()!;
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          setFeedBackText((prev) => prev + chunk);
+        }
+
+       
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+
   const handleModalSubmit = async () => {
     try {
       if (componentImageSrc && inputText && imageExtension) {
@@ -106,6 +143,8 @@ export default function Mvp2() {
       console.error("There was an error!", error);
     }
   };
+
+
   const handleModalSubmitRAG = async () => {
     try {
       const response = await fetch(
@@ -179,18 +218,48 @@ export default function Mvp2() {
           画像説明モード2
         </Button>
       </VStack>
-      {/* <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
+      {/* 右側のコンテンツ1 */}
+      <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
         {imageSrc && (
-          <Box flex="1" p={4}>
-            <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded Image" maxH="300px" objectFit="contain" />
-          </Box>
+          <>
+            <Button onClick={getFeedbackWithImage}>フィードバックをもらう</Button>
+            <Box flex="1" p={4}>
+              <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded Image" maxH="300px" objectFit="contain" />
+            </Box>
+              {convertedText && (
+                <Box
+                  flex="1"
+                  p={4}
+                  cursor="text"
+                  border="1px solid black"
+                  borderRadius="md"
+                  bg="gray.100"
+                  ml={4}
+                  maxHeight="200px" // 最大の高さを指定
+                  overflowY="auto"  // 縦方向のスクロールを有効にする
+                >
+                  <Text fontSize="xl">
+                    {feedBackText || ""}
+                  </Text>
+                </Box>)
+              }
+            <HStack>
+              {inputText && (
+                <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+                  <Text fontSize="xl">
+                    {inputText || ""}
+                  </Text>
+                </Box>)
+              }
+            <Box flex="1" p={4}>
+              <Text>{convertedText}</Text>
+            </Box>
+            </HStack>
+          </>
         )}
-        <Box flex="1" p={4}>
-          <pre>{convertedText}</pre>
-        </Box>
-      </VStack> */}
-      {/* 右側のコンテンツ */}
-      <Box display="flex" flexWrap="wrap">
+      </VStack>
+      {/* 右側のコンテンツ2 */}
+      {/* <Box display="flex" flexWrap="wrap">
         {sortedImagePaths.map((path, index) => (
           <Box
           key={index}
@@ -214,7 +283,7 @@ export default function Mvp2() {
           />
         </Box>
         ))}
-      </Box>
+      </Box> */}
       {/* モーダル1 */}
       <Modal isOpen={isOpenModal1} onClose={onCloseModal1}>
         <ModalOverlay />
