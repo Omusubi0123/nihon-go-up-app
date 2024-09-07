@@ -42,8 +42,8 @@ export default function Mvp2() {
           const apiResponse = await fetch(import.meta.env.VITE_FASTAPI_URL + 'descript/', {
             method: 'POST',
             body: JSON.stringify({
-              image: base64String,
-              text: inputText
+              b64_image_data: base64String,
+              // text: inputText
             }),
             headers: {
               'Content-Type': 'application/json'

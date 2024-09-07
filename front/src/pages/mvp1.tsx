@@ -13,7 +13,7 @@ export default function mvp1() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ prompt: inputText })
+        body: JSON.stringify({ raw_text: inputText, mode:"easy" })
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
