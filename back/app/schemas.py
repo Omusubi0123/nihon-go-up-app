@@ -15,13 +15,13 @@ class User(BaseModel):
     age: int
 
 
-class Query(BaseModel):
-    query: str
+class Text(BaseModel):
+    text: str
 
 
 class TextComplexity(BaseModel):
     raw_text: str
-    mode: Literal["easy", "hard"]
+    mode: Literal["easy", "hard", "term"]
 
 
 class ImageData(BaseModel):
