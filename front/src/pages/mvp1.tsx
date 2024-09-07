@@ -230,7 +230,7 @@ export default function mvp1() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      {/* モーダル */}
+      {/* モーダル2 */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
@@ -251,7 +251,7 @@ export default function mvp1() {
             </Button>
             <Button variant="ghost" onClick={onClose}>キャンセル</Button>
           </ModalFooter>
-        </ModalContent>
+          </ModalContent>
       </Modal>
     </HStack>
   );
