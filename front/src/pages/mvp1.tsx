@@ -8,7 +8,7 @@ export default function mvp1() {
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
   const handleClick = async () => {
     try {
-      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'cotomi/', {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'convert/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -30,10 +30,12 @@ export default function mvp1() {
       console.error('Error:', error);
     }
   };
+  
   const handleModalSubmit = () => {
     setText(inputText);  // 入力されたテキストを反映
     onClose();  // モーダルを閉じる
   };
+
   return (
     <HStack spacing={0} align="stretch" height="100vh">
       <VStack
