@@ -3,9 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import (
     cotomi_routes,
-    descript_image_routers,
+    descript_routers,
     flex_text_routers,
     item_routes,
+    ocr_routers,
     user_routes,
 )
 
@@ -15,7 +16,8 @@ app.include_router(item_routes.router, prefix="/items")
 app.include_router(user_routes.router, prefix="/users")
 app.include_router(cotomi_routes.router, prefix="/cotomi")
 app.include_router(flex_text_routers.router, prefix="/convert")
-app.include_router(descript_image_routers.router, prefix="/descript")
+app.include_router(descript_routers.router, prefix="/descript")
+app.include_router(ocr_routers.router, prefix="/ocr")
 
 app.add_middleware(
     CORSMiddleware,

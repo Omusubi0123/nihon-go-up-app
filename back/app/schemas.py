@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -20,8 +20,9 @@ class Cotomi(BaseModel):
 
 class TextComplexity(BaseModel):
     raw_text: str
-    mode: str
+    mode: Literal["easy", "hard"]
 
 
 class Base64Image(BaseModel):
     b64_image_data: bytes
+    mediatype: Literal["jpeg", "png"]
