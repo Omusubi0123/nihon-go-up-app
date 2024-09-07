@@ -8,14 +8,14 @@ from src.prompts.image_prompt import DESCRIPT_IMAGE_PROMPT, OCR_IMAGE_PROMPT
 from src.settings import Settings
 
 
-def local_image_to_data(image_path: str) -> bytes:
+def local_image_to_data(image_path: str) -> str:
     with open(image_path, "rb") as f:
         b64_image_data = base64.b64encode(f.read()).decode("utf-8")
     return b64_image_data
 
 
 def create_body(
-    b64_image_data: bytes,
+    image_bytes: bytes,
     mediatype: Literal["jpeg", "png"],
     mode: Literal["descript", "ocr"],
 ) -> str:
@@ -34,7 +34,7 @@ def create_body(
             "source": {
                 "type": "base64",
                 "media_type": f"image/{mediatype}",
-                "data": b64_image_data,
+                "data": base64.b64encode(image_bytes).decode("utf-8"),
             },
         }
     )
