@@ -25,6 +25,7 @@ export default function mvp1() {
   const [imageExtension, setImageExtension] = useState(""); // 選択された画像の拡張子
   const [selectedText, setSelectedText] = useState(""); // 選択されたテキスト
   const [isTextModalOpen, setIsTextModalOpen] = useState(false); // テキスト表示用モーダルの制御
+  const [detailText, setDetailText] = useState(""); // 単語の意味を格納
 
   const convertImageToBase64 = (imageSrc: string, callback: (base64String: string) => void) => {
     const img = new window.Image(); // ブラウザの組み込みImageオブジェクトを使用
@@ -89,11 +90,36 @@ export default function mvp1() {
             const { done, value } = await reader?.read()!;
             if (done) break;
             const chunk = decoder.decode(value, { stream: true });
-            setConvertedText((prev) => prev + chunk);
+            setDetailText((prev) => prev + chunk);
           }
         });
       } else {
         console.error('No input text.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleGetDetail = async () => {
+    try {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'detail/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: selectedText })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      while (true) {
+        const { done, value } = await reader?.read()!;
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        setConvertedText((prev) => prev + chunk);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -129,6 +155,11 @@ export default function mvp1() {
     }
   };
 
+  const handleCloseModal = () => {
+    setDetailText("");
+    setIsTextModalOpen(false);
+  };
+
   return (
     <HStack spacing={0} align="stretch" height="100vh">
       <VStack
@@ -155,9 +186,8 @@ export default function mvp1() {
           文章変換
         </Button>
       </VStack>
-      <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
         {inputText !== "" && (
-          <Box flex="1" p={4}>
+          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text">
             <Text fontSize="xl">{text || ""}</Text>
           </Box>          
         )}
@@ -171,17 +201,25 @@ export default function mvp1() {
             <Text fontSize="xl">{convertedText || ""}</Text>
           </Box>
         )}
-      </VStack>
       {/* テキスト選択用モーダル */}
-      <Modal isOpen={isTextModalOpen} onClose={() => setIsTextModalOpen(false)}>
+      <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>選択されたテキスト</ModalHeader>
           <ModalBody>
             <Text>{selectedText}</Text>
           </ModalBody>
+          {detailText && (
+            <ModalBody>
+              <Text>{detailText}</Text>
+            </ModalBody>
+          )  
+          }
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={() => setIsTextModalOpen(false)}>
+            <Button colorScheme="blue" mr={3} onClick={() => handleGetDetail()}>
+              単語の意味を調べる
+            </Button>
+            <Button colorScheme="blue" mr={3} onClick={() => handleCloseModal(false)}>
               閉じる
             </Button>
           </ModalFooter>
