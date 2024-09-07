@@ -1,4 +1,4 @@
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -25,3 +25,4 @@ class TextComplexity(BaseModel):
 
 class Base64Image(BaseModel):
     b64_image_data: bytes
+    mediatype: Literal["jpeg", "png"]
