@@ -3,6 +3,7 @@ import {
   VStack,
   HStack,
   Box,
+  Text,
   useDisclosure,
   Modal,
   ModalOverlay,
@@ -10,18 +11,43 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Input,
   Textarea,
   Center,
   Image,
 } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 
-
+const imagePaths = [
+  'data/1.jpeg',
+  'data/11.jpeg',
+  'data/13.jpeg',
+  'data/15.jpeg',
+  'data/17.jpeg',
+  'data/19.jpeg',
+  'data/20.jpeg',
+  'data/22.jpeg',
+  'data/3.jpeg',
+  'data/5.jpeg',
+  'data/7.jpeg',
+  'data/9.jpeg',
+  'data/12.jpeg',
+  'data/14.jpeg',
+  'data/16.jpeg',
+  'data/18.jpeg',
+  'data/2.jpeg',
+  'data/21.jpeg',
+  'data/23.jpeg',
+  'data/4.jpeg',
+  'data/6.jpeg',
+  'data/8.jpeg',
+];
 
 export default function Mvp2() {
   const { isOpen: isOpenModal1, onOpen: onOpenModal1, onClose: onCloseModal1 } = useDisclosure(); // モーダルの制御
   const { isOpen: isOpenModal2, onOpen: onOpenModal2, onClose: onCloseModal2 } = useDisclosure(); // モーダルの制御
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
+  const [inputTextForRAG, setInputTextForRAG] = useState(""); // モーダル内で入力されたテキスト
   const [imageSrc, setImageSrc] = useState<File | undefined>(undefined);
   const [componentImageSrc, setComponentImageSrc] = useState<File | undefined>(undefined);
   const [imageExtension, setImageExtension] = useState<string | null>(null); // 画像の拡張子を格納
@@ -67,35 +93,19 @@ export default function Mvp2() {
 
   const handleModalSubmitRAG = async () => {
     try {
-      if (componentImageSrc && inputText && imageExtension) {
-        const formData = new FormData();
-        const file = new Blob([componentImageSrc], { type: "image/png" });
-        const fileName = "sample.png";
-        
-        formData.append('image', file, fileName);
-        formData.append('text', "aiueo");
-        formData.append('mediatype', "png");
-    
-        const requestOptions = {
-          method: "POST",
-          body: formData,
-        };
-        
-        console.log("API呼び出し");
-        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'descript/', requestOptions);
-        console.log(response);
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder("utf-8");
-        while (true) {
-          const { done, value } = await reader?.read()!;
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          setConvertedText((prev) => prev + chunk);
-        }
-  
-        setImageSrc(componentImageSrc);
-        onCloseModal2();
-      }
+
+      const response = await fetch(
+        import.meta.env.VITE_FASTAPI_URL + 'ai_search/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: inputTextForRAG })
+      });
+      const data = await response.json();
+      
+      console.log(data);
+      
     } catch (error) {
       console.error("There was an error!", error);
     }
@@ -190,17 +200,29 @@ export default function Mvp2() {
       {/* モーダル2 */}
       <Modal isOpen={isOpenModal2} onClose={onCloseModal2}>
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>モード2</ModalHeader>
+        <ModalContent maxWidth={"50vw"}>
+          <ModalHeader>画像を選択してください</ModalHeader>
+          <ModalBody>
+            <Box display="flex" flexWrap="wrap">
+              {imagePaths.map((path, index) => (
+                <Box key={index} p={2}>
+                  <Image
+                    src={path}
+                    alt={`image-${index}`}
+                    boxSize="100px"
+                    objectFit="cover"
+                    borderRadius="md"
+                  />
+                </Box>
+              ))}
+            </Box>
+          </ModalBody>
           <ModalHeader>文章を入力してください</ModalHeader>
           <ModalBody>
             <Textarea
               placeholder="文章をここに入力"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              size="lg"
-              resize="vertical"  // 必要に応じてリサイズを許可
-              rows={10}  // 行数を指定
+              value={inputTextForRAG}
+              onChange={(e) => setInputTextForRAG(e.target.value)}
             />
           </ModalBody>
           <ModalFooter>
