@@ -16,3 +16,8 @@ class User(BaseModel):
 
 class Cotomi(BaseModel):
     prompt: str
+
+
+class TextComplexity(BaseModel):
+    raw_text: str
+    mode: str
