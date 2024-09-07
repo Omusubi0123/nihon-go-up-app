@@ -1,52 +1,84 @@
-import { Button, VStack, HStack, Box, Text, Image, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Center } from '@chakra-ui/react';
+import { Button, VStack, HStack, Box, Image as ChakraImage, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Center } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 
-export default function mvp2() {
+export default function Mvp2() {
   const { isOpen, onOpen, onClose } = useDisclosure(); // モーダルの制御
-  // const [text, setText] = useState("");
-  // const [convertedText, setConvertedText] = useState("");
   const [inputText, setInputText] = useState(""); // モーダル内で入力されたテキスト
   const [imageSrc, setImageSrc] = useState<string | null>(null); // 画像のURLを格納
+  const [componentImageSrc, setComponentImageSrc] = useState<string | null>(null); // 画像のURLを格納
   const inputFileRef = useRef<HTMLInputElement | null>(null); // ファイル選択の参照
+
+  // 画像データをBase64形式に変換する関数
+  const convertImageToBase64 = (imageSrc: string, callback: (base64String: string) => void) => {
+    const img = new window.Image(); // ブラウザの組み込みImageオブジェクトを使用
+    img.src = imageSrc;
+    
+    img.onload = () => {
+      // Canvasを作成して画像を描画
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        // Base64形式に変換
+        const base64String = canvas.toDataURL('image/png');
+        callback(base64String);
+      }
+    };
+  };
 
   const handleModalSubmit = async () => {
     try {
-      // const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'cotomi/', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({ prompt: inputText })
-      // });
-      // if (!response.ok) {
-      //   throw new Error(`HTTP error! status: ${response.status}`);
-      // }
-      // const reader = response.body?.getReader();
-      // const decoder = new TextDecoder("utf-8");
-      // while (true) {
-      //   const { done, value } = await reader?.read()!;
-      //   if (done) break;
-      //   const chunk = decoder.decode(value, { stream: true });
-      //   setConvertedText((prev) => prev + chunk);
-      // }
+      if (componentImageSrc) {
+        convertImageToBase64(componentImageSrc, async (base64String) => {
+          const formData = new FormData();
+          formData.append('image', base64String);
+          console.log(typeof(formData.get('image')));
+          console.log(formData.get('image'));
+          formData.append('text', inputText);
+
+          const apiResponse = await fetch(import.meta.env.VITE_FASTAPI_URL + 'descript/', {
+            method: 'POST',
+            body: JSON.stringify({
+              image: base64String,
+              text: inputText
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!apiResponse.ok) {
+            throw new Error(`HTTP error! status: ${apiResponse.status}`);
+          }
+
+          const result = await apiResponse.json();
+          console.log('Success:', result);
+
+          setImageSrc(componentImageSrc);
+          onClose(); // モーダルを閉じる
+        });
+      } else {
+        console.error('No image selected.');
+      }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  // ファイル選択後に画像をプレビューする関数
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; // ファイルの取得
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImageSrc(reader.result as string); // 読み込んだ画像のURLをセット
+        setComponentImageSrc(reader.result as string); // 読み込んだ画像のURLをセット
       };
       reader.readAsDataURL(file); // ファイルをデータURLとして読み込む
     }
   };
 
-  // 画像アップロードボタンがクリックされた時にファイル選択をトリガー
   const handleUploadClick = () => {
     if (inputFileRef.current) {
       inputFileRef.current.click(); // inputのclickイベントをトリガー
@@ -77,7 +109,7 @@ export default function mvp2() {
       <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
         {imageSrc && (
           <Box flex="1" p={4}>
-            <Image src={imageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
+            <ChakraImage src={imageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
           </Box>
         )}
       </VStack>
@@ -85,6 +117,19 @@ export default function mvp2() {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
+          <ModalHeader>画像を選択してください</ModalHeader>
+          <ModalBody>
+            <Center>
+              <Button width="90%" colorScheme="blue" onClick={handleUploadClick}>
+                画像を選択
+              </Button>
+            </Center>
+            {componentImageSrc && (
+              <Box flex="1" p={4}>
+                <ChakraImage src={componentImageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
+              </Box>
+            )}
+          </ModalBody>
           <ModalHeader>文章を入力してください</ModalHeader>
           <ModalBody>
             <Input
@@ -93,16 +138,6 @@ export default function mvp2() {
               onChange={(e) => setInputText(e.target.value)}
             />
           </ModalBody>
-          <Center>
-            <Button width="90%" colorScheme="blue" onClick={handleUploadClick}>
-              画像を選択
-            </Button>
-          </Center>
-          {imageSrc && (
-          <Box flex="1" p={4}>
-            <Image src={imageSrc} alt="Uploaded Image" maxH="300px" objectFit="contain" />
-          </Box>
-          )}
           <ModalFooter>
             <Button colorScheme="blue" mr={3} onClick={handleModalSubmit}>
               送信
