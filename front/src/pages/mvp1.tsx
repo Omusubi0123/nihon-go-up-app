@@ -33,13 +33,13 @@ export default function mvp1() {
 
   const handleClick = async () => {
     try {
-      if (inputText) {
+      if (text) {
         const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'convert/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ raw_text: inputText, mode: "easy" })
+          body: JSON.stringify({ raw_text: text, mode: "easy" })
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -188,23 +188,56 @@ export default function mvp1() {
       </VStack>
       {/* 右側の要素 */}
       <Box p={10} display="flex" flexDirection="row" justifyContent="space-between">
-        {inputText !== "" && (
-          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" mr={4}>
-            <Text fontSize="xl">{text || ""}</Text>
-          </Box>
-        )}
         {imageSrc && (
           <Box flex="1" p={4}>
             <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded" height="400px" objectFit="cover" />
           </Box>
         )}
-        {convertedText && (
-          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
-            <Text fontSize="xl">
-              {convertedText || ""}
-            </Text>
+          <Box display="flex" width="100%" p={4}>
+            {/* 左側のテキスト */}
+            {text !== "" && (
+              <Box
+                flex="1"
+                p={4}
+                onMouseUp={handleTextSelection}
+                cursor="text"
+                border="1px solid black"
+                borderRadius="md"
+                bg="gray.100"
+                mr={2} // 右側のマージン（適宜調整）
+                width="50%"    // 親要素の50%の幅
+                maxWidth="50%" // 親要素の50%の幅に制限
+                // height="40%" // 固定の高さを指定
+                overflowY="auto" // コンテンツが溢れた場合にスクロールを有効化
+              >
+                <Text fontSize="xl">
+                  {text || ""}
+                </Text>
+              </Box>
+            )}
+
+            {/* 右側のテキスト */}
+            {convertedText && (
+              <Box
+                flex="1"
+                p={4}
+                onMouseUp={handleTextSelection}
+                cursor="text"
+                border="1px solid black"
+                borderRadius="md"
+                bg="gray.100"
+                ml={2} // 左側のマージン（適宜調整）
+                width="50%"    // 親要素の50%の幅
+                maxWidth="50%" // 親要素の50%の幅に制限
+                // height="200px" // 固定の高さを指定
+                overflowY="auto" // コンテンツが溢れた場合にスクロールを有効化
+              >
+                <Text fontSize="xl">
+                  {convertedText || ""}
+                </Text>
+              </Box>
+            )}
           </Box>
-        )}
       </Box>
       {/* テキスト選択用モーダル */}
       <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
