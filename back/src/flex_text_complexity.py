@@ -2,7 +2,7 @@ from typing import Generator, Literal
 
 from openai import OpenAI
 
-from src.prompts.vocab_easy import VOCAB_EASY_PROMPT
+from src.prompts.vocabulary_prompt import CONVERT_VOCABULARY_PROMPT
 from src.settings import Settings
 
 
@@ -22,7 +22,7 @@ def flex_text_complexity(
             {"role": "system", "content": "あなたは文章をより語彙の難しい文章や易しい文書に変換することが世界で一番得です。"},
             {
                 "role": "user",
-                "content": VOCAB_EASY_PROMPT.format(difficult_text=raw_text),
+                "content": CONVERT_VOCABULARY_PROMPT.format(difficult_text=raw_text),
             },
         ],
         temperature=0.7,  # 出力のランダム度合い(可変)
