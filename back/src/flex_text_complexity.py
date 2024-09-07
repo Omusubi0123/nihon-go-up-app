@@ -55,9 +55,7 @@ def flex_text_complexity(
     for chunk in response:
         content = chunk.choices[0].delta.content
         if type(content) == str:
-            print(content, end="")
-            sys.stdout.flush()
-            # yield content
+            yield content
 
 
 if __name__ == "__main__":

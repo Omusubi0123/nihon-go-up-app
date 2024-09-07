@@ -1,5 +1,6 @@
 from typing import Literal, Optional
 
+from fastapi import File, Form, UploadFile
 from pydantic import BaseModel
 
 
@@ -14,8 +15,8 @@ class User(BaseModel):
     age: int
 
 
-class Cotomi(BaseModel):
-    prompt: str
+class Query(BaseModel):
+    query: str
 
 
 class TextComplexity(BaseModel):
@@ -23,6 +24,7 @@ class TextComplexity(BaseModel):
     mode: Literal["easy", "hard"]
 
 
-class Base64Image(BaseModel):
-    b64_image_data: bytes
-    mediatype: Literal["jpeg", "png"]
+class ImageData(BaseModel):
+    image: UploadFile = File(...)
+    mediatype: str = Form(...)
+    text: str = Form(...)

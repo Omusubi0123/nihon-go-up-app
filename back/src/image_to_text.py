@@ -73,6 +73,7 @@ def llm_process_image(
 
 
 def main():
+    import ast
     import json
     from glob import glob
 
@@ -80,16 +81,24 @@ def main():
 
     image_and_text = []
     for image_path in image_paths:
-        print("\nprocessing image:", image_path)
-        b64_image_data = local_image_to_data(image_path)
-        llm_process_image(b64_image_data)
-        image_and_text.append(
-            {
-                "description": llm_process_image(b64_image_data),
-                "id": image_path.split("/")[-1].split(".")[0],
-            }
-        )
-    with open("data/dog_use.json", "w") as f:
+        while True:
+            try:
+                print("\nprocessing image:", image_path)
+                b64_image_data = local_image_to_data(image_path)
+                response = llm_process_image(b64_image_data)
+                response_json = ast.literal_eval(response)
+
+                image_and_text.append(
+                    {
+                        "title": response_json["title"],
+                        "content": response_json["detail"],
+                        "id": image_path.split("/")[-1].split(".")[0],
+                    }
+                )
+                break
+            except Exception as e:
+                print(e)
+    with open("data/filesearch/dog_use_100.json", "w") as f:
         json.dump(image_and_text, f, indent=4, ensure_ascii=False)
 
 
