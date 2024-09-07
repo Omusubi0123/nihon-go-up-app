@@ -15,8 +15,8 @@ class User(BaseModel):
     age: int
 
 
-class Query(BaseModel):
-    query: str
+class Text(BaseModel):
+    text: str
 
 
 class TextComplexity(BaseModel):

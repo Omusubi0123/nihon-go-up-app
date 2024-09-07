@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from starlette.responses import StreamingResponse
 
-from app.schemas import TextComplexity
+from app.schemas import Text
 from src.cotomi_call import cotomi_call
 from src.prompts.vocabulary_prompt import TERM_AND_MEAN_PROMPT
 
@@ -24,6 +24,6 @@ router = APIRouter()
 
 # curlコマンド実行時は１文字ずつ返すために--no-bufferオプションを付ける
 @router.post("/")
-def term_and_mean_response(data: TextComplexity):
-    messages = create_messages(data.raw_text)
+def term_and_mean_response(data: Text):
+    messages = create_messages(data.text)
     return StreamingResponse(cotomi_call(messages), media_type="text/event-stream")
