@@ -252,8 +252,17 @@ export default function mvp1() {
           </Box>
         )}
           {inputText !== "" && (
-            <VStack>
-              <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" mr={4}>
+            <VStack width="50%">
+              <Box 
+                flex="1" 
+                p={4} 
+                onMouseUp={handleTextSelection} 
+                cursor="text" 
+                border="1px solid black" 
+                borderRadius="md" 
+                bg="gray.100" 
+                ml={4} 
+              >
                 {!isHurigana1 ? (
                   <Text fontSize="xl">{text || ""}</Text>
                 ) : (
@@ -261,15 +270,25 @@ export default function mvp1() {
                 )}
                 
               </Box>
-              <Button marginRight={10} width="100%" colorScheme="blue" size="lg" onClick={toggleHurigana1}>
+              <Button width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana1}>
                 ふりがな切り替え
               </Button>
             </VStack>
           )}
         
           {convertedText && (
-            <VStack>
-              <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+            <VStack width="50%">
+              <Box 
+                flex="1" 
+                p={4} 
+                onMouseUp={handleTextSelection} 
+                cursor="text" 
+                border="1px solid black" 
+                borderRadius="md" 
+                bg="gray.100" 
+                ml={4} 
+                
+              >
                 <Text fontSize="xl">
                   {!isHurigana2 ? (
                     <Text fontSize="xl">{convertedText || ""}</Text>
@@ -278,7 +297,7 @@ export default function mvp1() {
                   )}
                 </Text>
               </Box>
-              <Button marginLeft={10} width="100%" colorScheme="blue" size="lg" onClick={toggleHurigana2}>
+              <Button width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana2}>
                 ふりがな切り替え
               </Button>
             </VStack>
