@@ -18,6 +18,7 @@ import {
 } from '@chakra-ui/react';
 import ReactMarkdown from 'react-markdown';
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 // const imagePaths = [
 //   'data/1.jpeg',
 //   'data/11.jpeg',
@@ -90,6 +91,7 @@ export default function Mvp2() {
 
   const [detailText, setDetailText] = useState("");
 
+  const navigate = useNavigate();
 
 
   const getFeedbackWithImage = async () => {
@@ -332,6 +334,10 @@ export default function Mvp2() {
     setIsTextModalOpen(false);
   };
 
+  const gotoOutput = () => {
+    navigate('/');  // "/about" へ画面遷移
+  };
+
   return (
     <HStack spacing={0} align="stretch" minHeight={"100vh"}>
       <VStack
@@ -349,18 +355,22 @@ export default function Mvp2() {
           style={{ display: 'none' }} // inputを非表示にする
           onChange={handleFileChange}
         />
-        <Button width="100%" colorScheme="blue" size="lg" onClick={handleMode1}>
-          画像説明モード1
+        <Text fontSize="xl">説明してみよう</Text>
+        <Button bg="green" width="100%" colorScheme="blue" size="lg" onClick={handleMode1}>
+          これな〜んだ？
         </Button>
-        <Button width="100%" colorScheme="blue" size="lg" onClick={handleMode2}>
-          画像説明モード2
+        <Button bg="green" width="100%" colorScheme="blue" size="lg" onClick={handleMode2}>
+          これど〜れだ？
+        </Button>
+        <Button width="100%" size="lg" bg="orange" colorScheme="teal" onClick={gotoOutput}>
+          読むモード
         </Button>
       </VStack>
       {/* 右側のコンテンツ1 */}
       {mode1 && (
         <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
             
-            <Button onClick={getFeedbackWithImage}>フィードバックをもらう</Button>
+            <Button color="white" bg="green" onClick={getFeedbackWithImage}>フィードバックをもらう</Button>
               <HStack justifyContent="center" width="100%">
                 <Box flex="1" p={4} display="flex" justifyContent="center">
                   {imageSrc && (
@@ -383,16 +393,21 @@ export default function Mvp2() {
                     border="1px solid black" 
                     borderRadius="md" 
                     bg="gray.100" 
-                    ml={4} 
+                    ml={4}
+                    overflow="hidden"          // ボックスの範囲を超える部分を隠す
+                    textOverflow="ellipsis"    // テキストが長すぎる場合に "..." を表示
+                    whiteSpace="normal"        // テキストが折り返されるように設定
                   >
                     {!isHurigana3 ? (
-                      <Text fontSize="xl">{feedBackText || ""}</Text>
+                      <Box p={4}>
+                        <ReactMarkdown>{feedBackText || ""}</ReactMarkdown>
+                      </Box>
                     ) : (
                       <Text fontSize="xl">{huriganaText3 || ""}</Text>
                     )}
                     
                   </Box>
-                  <Button width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana3}>
+                  <Button bg="green" width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana3}>
                     ふりがな切り替え
                   </Button>
                 </VStack>
@@ -422,7 +437,7 @@ export default function Mvp2() {
                     )}
                     
                   </Box>
-                  <Button width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana1}>
+                  <Button bg="green" width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana1}>
                     ふりがな切り替え
                   </Button>
                 </VStack>
@@ -454,7 +469,7 @@ export default function Mvp2() {
                       )}
                     </Text>
                   </Box>
-                  <Button width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana2}>
+                  <Button bg="green" width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana2}>
                     ふりがな切り替え
                   </Button>
                 </VStack>
@@ -503,11 +518,11 @@ export default function Mvp2() {
       <Modal isOpen={isOpenModal1} onClose={onCloseModal1}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>画像を選択してください</ModalHeader>
+          <ModalHeader>画像を選んでください</ModalHeader>
           <ModalBody>
             <Center>
-              <Button width="90%" colorScheme="blue" onClick={handleUploadClick}>
-                画像を選択
+              <Button bg="green" width="90%" colorScheme="blue" onClick={handleUploadClick}>
+                画像を選ぶ
               </Button>
             </Center>
             {componentImageSrc && (
@@ -516,10 +531,10 @@ export default function Mvp2() {
               </Box>
             )}
           </ModalBody>
-          <ModalHeader>文章を入力してください</ModalHeader>
+          <ModalHeader>この画像を説明してみよう</ModalHeader>
           <ModalBody>
             <Textarea
-              placeholder="文章をここに入力"
+              placeholder="文章をここに打つ"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               size="lg"
@@ -528,10 +543,10 @@ export default function Mvp2() {
             />
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleModalSubmit}>
+            <Button bg="green" colorScheme="blue" mr={3} onClick={handleModalSubmit}>
               送信
             </Button>
-            <Button variant="ghost" onClick={onCloseModal1}>キャンセル</Button>
+            <Button bg="green" variant="ghost" onClick={onCloseModal1}>キャンセル</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -539,7 +554,7 @@ export default function Mvp2() {
       <Modal isOpen={isOpenModal2} onClose={onCloseModal2}>
         <ModalOverlay />
         <ModalContent maxWidth={"50vw"}>
-          <ModalHeader>画像を選択してください</ModalHeader>
+          <ModalHeader>画像を選んでください</ModalHeader>
           <ModalBody>
             <Box display="flex" flexWrap="wrap">
               {imagePaths.map((path, index) => (
@@ -558,24 +573,24 @@ export default function Mvp2() {
                     objectFit="cover"
                     borderRadius="md"
                   />
-                  {index}
+                  {index+1}
                 </Box>
               ))}
             </Box>
           </ModalBody>
-          <ModalHeader>文章を入力してください</ModalHeader>
+          <ModalHeader>この画像を説明してみよう</ModalHeader>
           <ModalBody>
             <Textarea
-              placeholder="文章をここに入力"
+              placeholder="文章をここに打つ"
               value={inputTextForRAG}
               onChange={(e) => setInputTextForRAG(e.target.value)}
             />
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleModalSubmitRAG}>
+            <Button bg="green" colorScheme="blue" mr={3} onClick={handleModalSubmitRAG}>
               送信
             </Button>
-            <Button variant="ghost" onClick={onCloseModal2}>キャンセル</Button>
+            <Button bg="green" variant="ghost" onClick={onCloseModal2}>キャンセル</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -593,10 +608,10 @@ export default function Mvp2() {
           )  
           }
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={() => handleGetDetail()}>
+            <Button bg="green" colorScheme="blue" mr={3} onClick={() => handleGetDetail()}>
               単語の意味を調べる
             </Button>
-            <Button colorScheme="blue" mr={3} onClick={() => handleCloseModal(false)}>
+            <Button bg="green" colorScheme="blue" mr={3} onClick={() => handleCloseModal(false)}>
               閉じる
             </Button>
           </ModalFooter>
