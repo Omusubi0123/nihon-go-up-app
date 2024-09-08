@@ -203,12 +203,14 @@ export default function Mvp2() {
 
 
   const handleMode1 = () => {
+    setMode1(false);
     setMode2(false);
     onOpenModal1();
   }
 
   const handleMode2 = () => {
     setMode1(false);
+    setMode2(false);
     onOpenModal2();  
   }
 
@@ -239,6 +241,7 @@ export default function Mvp2() {
       {/* 右側のコンテンツ1 */}
       {mode1 && (
         <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
+            
             <Button onClick={getFeedbackWithImage}>フィードバックをもらう</Button>
               <HStack justifyContent="center" width="100%">
                 <Box flex="1" p={4} display="flex" justifyContent="center">
@@ -272,29 +275,37 @@ export default function Mvp2() {
       {/* 右側のコンテンツ2 */}
       {mode2 && (
         <Box display="flex" flexWrap="wrap">
-          {sortedImagePaths.map((path, index) => (
-            <Box
-            key={index}
-            margin={30}
-            marginLeft={20}
-            marginRight={20}
-            // width="120px" // Boxの幅を指定
-            // height="120px" // Boxの高さを指定
-            border={selectedIndex === index ? '2px solid red' : 'none'} // 選択された画像に赤い輪郭を表示
-            borderRadius="md"
-            display="flex" // 子要素を中央に配置するため
-            justifyContent="center" // 水平方向に中央揃え
-            alignItems="center" // 垂直方向に中央揃え
-          >
-            <Image
-              src={path}
-              alt={`image-${index}`}
-              boxSize="100px" // 画像のサイズを指定
-              objectFit="cover" // 画像の比率を保ちながら中央に収める
-              borderRadius="md"
-            />
-          </Box>
-          ))}
+          {/* <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+          <Text>あなたの入力した文章とマッチする画像を、類似度が高い順に並べた結果以下の通りになりました。あなたの選んだ画像がより順番の先頭となるように上手く説明してみましょう！！！！</Text>  
+          </Box> */}
+            {sortedImagePaths.map((path, index) => (
+              <VStack>
+                <Box
+                key={index}
+                marginTop={10}
+                marginLeft={20}
+                marginRight={20}
+                // width="120px" // Boxの幅を指定
+                // height="120px" // Boxの高さを指定
+                border={selectedIndex === index ? '8px solid red' : 'none'} // 選択された画像に赤い輪郭を表示
+                borderRadius="md"
+                display="flex" // 子要素を中央に配置するため
+                justifyContent="center" // 水平方向に中央揃え
+                alignItems="center" // 垂直方向に中央揃え
+              >
+                <Image
+                  src={path}
+                  alt={`image-${index}`}
+                  boxSize="100px" // 画像のサイズを指定
+                  objectFit="cover" // 画像の比率を保ちながら中央に収める
+                  borderRadius="md"
+                />
+              </Box>
+              <Text>
+                {index}
+              </Text>
+            </VStack>
+            ))}
         </Box>
       )}
       {/* モーダル1 */}
@@ -345,7 +356,7 @@ export default function Mvp2() {
                   key={index}
                   m={2}
                   onClick={() => handleImageClick(index)}
-                  border={selectedIndex === index ? '2px solid red' : 'none'} // 選択された画像に赤い輪郭を表示
+                  border={selectedIndex === index ? '8px solid red' : 'none'} // 選択された画像に赤い輪郭を表示
                   borderRadius="md"
                   cursor="pointer" // クリック可能であることを示すためにカーソルを変更
                 >
