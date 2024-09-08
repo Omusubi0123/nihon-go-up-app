@@ -96,6 +96,7 @@ export default function Mvp2() {
           body: formData,
         };
         const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'compare/', requestOptions);
+
         console.log("response: ", response);
         const reader = response.body?.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -105,8 +106,6 @@ export default function Mvp2() {
           const chunk = decoder.decode(value, { stream: true });
           setFeedBackText((prev) => prev + chunk);
         }
-
-       
       }
     } catch (error) {
       console.error('Error:', error);
@@ -129,6 +128,9 @@ export default function Mvp2() {
         };
         console.log("API呼び出し");
         const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'descript/', requestOptions);
+        setMode1(true);
+        setImageSrc(componentImageSrc);
+        onCloseModal1();
         console.log(response);
         const reader = response.body?.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -138,9 +140,8 @@ export default function Mvp2() {
           const chunk = decoder.decode(value, { stream: true });
           setConvertedText((prev) => prev + chunk);
         }
-        setImageSrc(componentImageSrc);
-        onCloseModal1();
-        setMode1(true);
+        
+        
       }
     } catch (error) {
       console.error("There was an error!", error);
@@ -158,6 +159,7 @@ export default function Mvp2() {
         },
         body: JSON.stringify({ text: inputTextForRAG })
       });
+      setMode2(true);
       const data = await response.json();
       console.log(data);
       const sortedPaths = await data.id.map((id: number) => imagePaths[id - 1]); // idに基づいてimagePathsを並び替え
@@ -170,7 +172,7 @@ export default function Mvp2() {
         console.log("newIndex:", selectedIndex);
       }
       onCloseModal2();
-      setMode2(true);
+      
     } catch (error) {
       console.error("There was an error!", error);
     }
@@ -237,32 +239,35 @@ export default function Mvp2() {
       {/* 右側のコンテンツ1 */}
       {mode1 && (
         <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
-        {imageSrc && (
-          <>
             <Button onClick={getFeedbackWithImage}>フィードバックをもらう</Button>
-            <Box flex="1" p={4}>
-              <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded Image" maxH="300px" objectFit="contain" />
-            </Box>
-            <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
-              {feedBackText && (
-                <Text>{feedBackText}</Text>  
-              )}
-            </Box>
+              <HStack justifyContent="center" width="100%">
+                <Box flex="1" p={4} display="flex" justifyContent="center">
+                  {imageSrc && (
+                    <Image
+                      src={URL.createObjectURL(imageSrc)}
+                      alt="Uploaded Image"
+                      maxH="300px"
+                      objectFit="contain"
+                    />
+                  )}
+                </Box>
+              </HStack>
+            {feedBackText && (
+              <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+                  <Text>{feedBackText}</Text>  
+              </Box>
+            )}
             <HStack>
-              {inputText && (
-                <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
-                  <Text fontSize="xl">
-                    {inputText || ""}
-                  </Text>
-                </Box>)
-              }
-            <Box flex="1" p={4}>
+              <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+                <Text fontSize="xl">
+                  {inputText || ""}
+                </Text>
+              </Box>
+              <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
               <Text>{convertedText}</Text>
             </Box>
             </HStack>
-          </>
-        )}
-      </VStack>
+        </VStack>
       )}
       {/* 右側のコンテンツ2 */}
       {mode2 && (
