@@ -78,6 +78,7 @@ export default function Mvp2() {
   const [feedBackText, setFeedBackText] = useState("");
   const [mode1, setMode1] = useState(false);
   const [mode2, setMode2] = useState(false);
+  const [selectedText, setSelectedText] = useState(""); // 選択されたテキストを保持
 
 
   const getFeedbackWithImage = async () => {
@@ -214,6 +215,14 @@ export default function Mvp2() {
     onOpenModal2();  
   }
 
+  const handleTextSelection = () => {
+    const selectedText = window.getSelection()?.toString() || "";
+    if (selectedText) {
+      setSelectedText(selectedText);
+      setIsTextModalOpen(true);
+    }
+  };
+
   return (
     <HStack spacing={0} align="stretch" height="100vh">
       <VStack
@@ -261,11 +270,38 @@ export default function Mvp2() {
               </Box>
             )}
             <HStack>
-              <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+              {/* <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
                 <Text fontSize="xl">
                   {inputText || ""}
                 </Text>
-              </Box>
+              </Box> */}
+              {inputText !== "" && (
+                <VStack width="50%">
+                  <Box 
+                    flex="1" 
+                    p={4} 
+                    onMouseUp={handleTextSelection} 
+                    cursor="text" 
+                    border="1px solid black" 
+                    borderRadius="md" 
+                    bg="gray.100" 
+                    ml={4} 
+                  >
+                    {!isHurigana1 ? (
+                      <Text fontSize="xl">{text || ""}</Text>
+                    ) : (
+                      <Text fontSize="xl">{huriganaText1 || ""}</Text>
+                    )}
+                    
+                  </Box>
+                  <Button width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana1}>
+                    ふりがな切り替え
+                  </Button>
+                </VStack>
+              )}
+
+
+
               <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
               <Text>{convertedText}</Text>
             </Box>
