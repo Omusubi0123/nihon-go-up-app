@@ -211,7 +211,7 @@ export default function mvp1() {
   
 
   return (
-    <HStack spacing={0} align="stretch" height="100vh">
+    <HStack spacing={0} align="stretch" minHeight={"100vh"}>
       <VStack
         w="250px"
         p={4}
