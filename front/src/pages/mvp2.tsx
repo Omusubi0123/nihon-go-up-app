@@ -16,6 +16,7 @@ import {
   Center,
   Image,
 } from '@chakra-ui/react';
+import ReactMarkdown from 'react-markdown';
 import { useState, useRef } from 'react';
 // const imagePaths = [
 //   'data/1.jpeg',
@@ -78,6 +79,17 @@ export default function Mvp2() {
   const [feedBackText, setFeedBackText] = useState("");
   const [mode1, setMode1] = useState(false);
   const [mode2, setMode2] = useState(false);
+  const [selectedText, setSelectedText] = useState(""); // 選択されたテキストを保持
+  const [isHurigana1, setIsHurigana1] = useState(false);
+  const [isHurigana2, setIsHurigana2] = useState(false);
+  const [isHurigana3, setIsHurigana3] = useState(false);
+  const [huriganaText1, setHuriganaText1] = useState("");
+  const [huriganaText2, setHuriganaText2] = useState("");
+  const [huriganaText3, setHuriganaText3] = useState("");
+  const [isTextModalOpen, setIsTextModalOpen] = useState(false); // テキスト表示用モーダルの制御
+
+  const [detailText, setDetailText] = useState("");
+
 
 
   const getFeedbackWithImage = async () => {
@@ -128,12 +140,12 @@ export default function Mvp2() {
         };
         console.log("API呼び出し");
         const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'descript/', requestOptions);
-        setMode1(true);
-        setImageSrc(componentImageSrc);
-        onCloseModal1();
         console.log(response);
         const reader = response.body?.getReader();
         const decoder = new TextDecoder("utf-8");
+        setMode1(true);
+        setImageSrc(componentImageSrc);
+        onCloseModal1();
         while (true) {
           const { done, value } = await reader?.read()!;
           if (done) break;
@@ -145,6 +157,31 @@ export default function Mvp2() {
       }
     } catch (error) {
       console.error("There was an error!", error);
+    }
+  };
+
+  const handleGetDetail = async () => {
+    try {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'meaning/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: selectedText })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      while (true) {
+        const { done, value } = await reader?.read()!;
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        setDetailText((prev) => prev + chunk);
+      }
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -214,8 +251,89 @@ export default function Mvp2() {
     onOpenModal2();  
   }
 
+  const postHurigana = async (targetText: string, huriganaIdx: number) => {
+    try {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'hurigana/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: targetText})
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      if (huriganaIdx === 1) {
+        setIsHurigana1(true);
+      }
+      else if (huriganaIdx === 2) {
+        setIsHurigana2(true);
+      } else {
+        setIsHurigana3(true);
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      while (true) {
+        const { done, value } = await reader?.read()!;
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        if (huriganaIdx === 1) {
+          setHuriganaText1((prev) => prev + chunk);
+        }
+        else if (huriganaIdx === 2) {
+          setHuriganaText2((prev) => prev + chunk);
+        } else {
+          setHuriganaText3((prev) => prev + chunk);
+        }
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const toggleHurigana1 = () => {
+    if (huriganaText1 === "") {
+      postHurigana(inputText, 1);
+    } else {
+      setIsHurigana1(!isHurigana1);
+    }
+  };
+
+  const toggleHurigana2 = () => {
+    if (huriganaText2 === "") {
+      postHurigana(convertedText, 2);
+    } else {
+      setIsHurigana2(!isHurigana2);
+    }
+  };
+
+  const toggleHurigana3 = () => {
+    if (huriganaText3 === "") {
+      postHurigana(convertedText, 3);
+    } else {
+      setIsHurigana3(!isHurigana3);
+    }
+  };
+  
+
+  const handleTextSelection = () => {
+    const selectedText = window.getSelection()?.toString() || "";
+    if (selectedText) {
+      setSelectedText(selectedText);
+      setIsTextModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setDetailText("");
+    setIsTextModalOpen(false);
+  };
+
   return (
-    <HStack spacing={0} align="stretch" height="100vh">
+    <HStack spacing={0} align="stretch" minHeight={"100vh"}>
       <VStack
         w="250px"
         p={4}
@@ -255,20 +373,93 @@ export default function Mvp2() {
                   )}
                 </Box>
               </HStack>
-            {feedBackText && (
-              <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
-                  <Text>{feedBackText}</Text>  
-              </Box>
-            )}
+              {feedBackText !== "" && (
+                <VStack>
+                  <Box 
+                    flex="1" 
+                    p={4} 
+                    onMouseUp={handleTextSelection} 
+                    cursor="text" 
+                    border="1px solid black" 
+                    borderRadius="md" 
+                    bg="gray.100" 
+                    ml={4} 
+                  >
+                    {!isHurigana3 ? (
+                      <Text fontSize="xl">{feedBackText || ""}</Text>
+                    ) : (
+                      <Text fontSize="xl">{huriganaText3 || ""}</Text>
+                    )}
+                    
+                  </Box>
+                  <Button width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana3}>
+                    ふりがな切り替え
+                  </Button>
+                </VStack>
+              )}
             <HStack>
-              <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+              {/* <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
                 <Text fontSize="xl">
                   {inputText || ""}
                 </Text>
-              </Box>
-              <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
-              <Text>{convertedText}</Text>
-            </Box>
+              </Box> */}
+              {inputText !== "" && (
+                <VStack width="50%">
+                  <Box 
+                    flex="1" 
+                    p={4} 
+                    onMouseUp={handleTextSelection} 
+                    cursor="text" 
+                    border="1px solid black" 
+                    borderRadius="md" 
+                    bg="gray.100" 
+                    ml={4} 
+                  >
+                    {!isHurigana1 ? (
+                      <Text fontSize="xl">{inputText || ""}</Text>
+                    ) : (
+                      <Text fontSize="xl">{huriganaText1 || ""}</Text>
+                    )}
+                    
+                  </Box>
+                  <Button width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana1}>
+                    ふりがな切り替え
+                  </Button>
+                </VStack>
+              )}
+
+
+
+              {/* <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+              <Text>{convertedText}</Text> */}
+
+              {convertedText && (
+                <VStack width="50%">
+                  <Box 
+                    flex="1" 
+                    p={4} 
+                    onMouseUp={handleTextSelection} 
+                    cursor="text" 
+                    border="1px solid black" 
+                    borderRadius="md" 
+                    bg="gray.100" 
+                    ml={4} 
+                    
+                  >
+                    <Text fontSize="xl">
+                      {!isHurigana2 ? (
+                        <Text fontSize="xl">{convertedText || ""}</Text>
+                      ) : (
+                        <Text fontSize="xl">{huriganaText2 || ""}</Text>
+                      )}
+                    </Text>
+                  </Box>
+                  <Button width="50%" colorScheme="blue" size="lg" onClick={toggleHurigana2}>
+                    ふりがな切り替え
+                  </Button>
+                </VStack>
+              )}              
+            {/* </Box> */}
             </HStack>
         </VStack>
       )}
@@ -388,6 +579,30 @@ export default function Mvp2() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>選択されたテキスト</ModalHeader>
+          <ModalBody>
+            <Text>{selectedText}</Text>
+          </ModalBody>
+          {detailText && (
+            <ModalBody>
+              <ReactMarkdown>{detailText}</ReactMarkdown>
+            </ModalBody>
+          )  
+          }
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={() => handleGetDetail()}>
+              単語の意味を調べる
+            </Button>
+            <Button colorScheme="blue" mr={3} onClick={() => handleCloseModal(false)}>
+              閉じる
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </HStack>
+    
   );
 }
