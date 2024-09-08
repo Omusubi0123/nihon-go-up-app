@@ -242,7 +242,6 @@ export default function mvp1() {
               </Text>
             </Box>
           )}
-
           {/* 右側のテキスト */}
           {convertedText && (
             <Box

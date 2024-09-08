@@ -76,6 +76,8 @@ export default function Mvp2() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [sortedImagePaths, setSortedImagePaths] = useState<string[]>(imagePaths); // ソートされた画像パスを保持
   const [feedBackText, setFeedBackText] = useState("");
+  const [mode1, setMode1] = useState(false);
+  const [mode2, setMode2] = useState(false);
 
 
   const getFeedbackWithImage = async () => {
@@ -138,6 +140,7 @@ export default function Mvp2() {
         }
         setImageSrc(componentImageSrc);
         onCloseModal1();
+        setMode1(true);
       }
     } catch (error) {
       console.error("There was an error!", error);
@@ -167,6 +170,7 @@ export default function Mvp2() {
         console.log("newIndex:", selectedIndex);
       }
       onCloseModal2();
+      setMode2(true);
     } catch (error) {
       console.error("There was an error!", error);
     }
@@ -194,6 +198,18 @@ export default function Mvp2() {
     }
     console.log(selectedIndex);
   };
+
+
+  const handleMode1 = () => {
+    setMode2(false);
+    onOpenModal1();
+  }
+
+  const handleMode2 = () => {
+    setMode1(false);
+    onOpenModal2();  
+  }
+
   return (
     <HStack spacing={0} align="stretch" height="100vh">
       <VStack
@@ -211,38 +227,27 @@ export default function Mvp2() {
           style={{ display: 'none' }} // inputを非表示にする
           onChange={handleFileChange}
         />
-        <Button width="100%" colorScheme="blue" size="lg" onClick={onOpenModal1}>
+        <Button width="100%" colorScheme="blue" size="lg" onClick={handleMode1}>
           画像説明モード1
         </Button>
-        <Button width="100%" colorScheme="blue" size="lg" onClick={onOpenModal2}>
+        <Button width="100%" colorScheme="blue" size="lg" onClick={handleMode2}>
           画像説明モード2
         </Button>
       </VStack>
       {/* 右側のコンテンツ1 */}
-      <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
+      {mode1 && (
+        <VStack flex="1" p={4} bg="gray.200" align="start" spacing={4}>
         {imageSrc && (
           <>
             <Button onClick={getFeedbackWithImage}>フィードバックをもらう</Button>
             <Box flex="1" p={4}>
               <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded Image" maxH="300px" objectFit="contain" />
             </Box>
-              {convertedText && (
-                <Box
-                  flex="1"
-                  p={4}
-                  cursor="text"
-                  border="1px solid black"
-                  borderRadius="md"
-                  bg="gray.100"
-                  ml={4}
-                  maxHeight="200px" // 最大の高さを指定
-                  overflowY="auto"  // 縦方向のスクロールを有効にする
-                >
-                  <Text fontSize="xl">
-                    {feedBackText || ""}
-                  </Text>
-                </Box>)
-              }
+            <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+              {feedBackText && (
+                <Text>{feedBackText}</Text>  
+              )}
+            </Box>
             <HStack>
               {inputText && (
                 <Box flex="1" p={4} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
@@ -258,32 +263,35 @@ export default function Mvp2() {
           </>
         )}
       </VStack>
+      )}
       {/* 右側のコンテンツ2 */}
-      {/* <Box display="flex" flexWrap="wrap">
-        {sortedImagePaths.map((path, index) => (
-          <Box
-          key={index}
-          margin={30}
-          marginLeft={20}
-          marginRight={20}
-          // width="120px" // Boxの幅を指定
-          // height="120px" // Boxの高さを指定
-          border={selectedIndex === index ? '2px solid red' : 'none'} // 選択された画像に赤い輪郭を表示
-          borderRadius="md"
-          display="flex" // 子要素を中央に配置するため
-          justifyContent="center" // 水平方向に中央揃え
-          alignItems="center" // 垂直方向に中央揃え
-        >
-          <Image
-            src={path}
-            alt={`image-${index}`}
-            boxSize="100px" // 画像のサイズを指定
-            objectFit="cover" // 画像の比率を保ちながら中央に収める
+      {mode2 && (
+        <Box display="flex" flexWrap="wrap">
+          {sortedImagePaths.map((path, index) => (
+            <Box
+            key={index}
+            margin={30}
+            marginLeft={20}
+            marginRight={20}
+            // width="120px" // Boxの幅を指定
+            // height="120px" // Boxの高さを指定
+            border={selectedIndex === index ? '2px solid red' : 'none'} // 選択された画像に赤い輪郭を表示
             borderRadius="md"
-          />
+            display="flex" // 子要素を中央に配置するため
+            justifyContent="center" // 水平方向に中央揃え
+            alignItems="center" // 垂直方向に中央揃え
+          >
+            <Image
+              src={path}
+              alt={`image-${index}`}
+              boxSize="100px" // 画像のサイズを指定
+              objectFit="cover" // 画像の比率を保ちながら中央に収める
+              borderRadius="md"
+            />
+          </Box>
+          ))}
         </Box>
-        ))}
-      </Box> */}
+      )}
       {/* モーダル1 */}
       <Modal isOpen={isOpenModal1} onClose={onCloseModal1}>
         <ModalOverlay />
@@ -343,6 +351,7 @@ export default function Mvp2() {
                     objectFit="cover"
                     borderRadius="md"
                   />
+                  {index}
                 </Box>
               ))}
             </Box>
