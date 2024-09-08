@@ -37,13 +37,13 @@ export default function mvp1() {
 
   const handleClick = async () => {
     try {
-      if (inputText) {
+      if (text) {
         const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'convert/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ raw_text: inputText, mode: "easy" })
+          body: JSON.stringify({ raw_text: text, mode: "easy" })
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -247,8 +247,34 @@ export default function mvp1() {
       {/* 右側の要素 */}
       <Box p={10} display="flex" flexDirection="row" justifyContent="space-between">
         {imageSrc && (
-          <Box flex="1" p={4}>
-            <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded" height="400px" objectFit="cover" />
+          <Box display="flex" width="100%" p={4}>
+            {/* 画像を表示するBox */}
+            <Box
+              flex="1"
+              p={4}
+              mr={2} // 右側のマージンを追加（必要に応じて調整）
+            >
+              <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded" height="400px" objectFit="cover" />
+            </Box>
+
+            {/* convertedTextを表示するBox */}
+            {convertedText && (
+              <Box
+                flex="1"
+                p={4}
+                onMouseUp={handleTextSelection}
+                cursor="text"
+                border="1px solid black"
+                borderRadius="md"
+                bg="gray.100"
+                ml={2} // 左側のマージンを追加（必要に応じて調整）
+                overflowY="auto" // コンテンツが溢れた場合にスクロールを有効化
+              >
+                <Text fontSize="xl">
+                  {convertedText || ""}
+                </Text>
+              </Box>
+            )}
           </Box>
         )}
           {inputText !== "" && (
@@ -302,7 +328,6 @@ export default function mvp1() {
               </Button>
             </VStack>
           )}
-        
       </Box>
       {/* テキスト選択用モーダル */}
       <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
