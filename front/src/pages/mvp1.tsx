@@ -30,6 +30,10 @@ export default function mvp1() {
   const [isTextModalOpen, setIsTextModalOpen] = useState(false); // テキスト表示用モーダルの制御
   const [componentImageSrc, setComponentImageSrc] = useState<File | undefined>(undefined);
   const inputFileRef = useRef<HTMLInputElement | null>(null); // ファイル選択の参照
+  const [isHurigana1, setIsHurigana1] = useState(false);
+  const [isHurigana2, setIsHurigana2] = useState(false);
+  const [huriganaText1, setHuriganaText1] = useState("");
+  const [huriganaText2, setHuriganaText2] = useState(""); 
 
   const handleClick = async () => {
     try {
@@ -150,6 +154,60 @@ export default function mvp1() {
   };
 
 
+  const postHurigana = async (targetText: string, huriganaIdx: number) => {
+    try {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'hurigana/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: targetText})
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      if (huriganaIdx === 1) {
+        setIsHurigana1(true);
+      }
+      else {
+        setIsHurigana2(true);
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      while (true) {
+        const { done, value } = await reader?.read()!;
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        if (huriganaIdx === 1) {
+          setHuriganaText1((prev) => prev + chunk);
+        }
+        else {
+          setHuriganaText2((prev) => prev + chunk);
+        } 
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const toggleHurigana1 = () => {
+    if (huriganaText1 === "") {
+      postHurigana(text, 1);
+    } else {
+      setIsHurigana1(!isHurigana1);
+    }
+  };
+
+  const toggleHurigana2 = () => {
+    if (huriganaText2 === "") {
+      postHurigana(convertedText, 2);
+    } else {
+      setIsHurigana2(!isHurigana2);
+    }
+  };
   
 
   return (
@@ -188,23 +246,44 @@ export default function mvp1() {
       </VStack>
       {/* 右側の要素 */}
       <Box p={10} display="flex" flexDirection="row" justifyContent="space-between">
-        {inputText !== "" && (
-          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" mr={4}>
-            <Text fontSize="xl">{text || ""}</Text>
-          </Box>
-        )}
         {imageSrc && (
           <Box flex="1" p={4}>
             <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded" height="400px" objectFit="cover" />
           </Box>
         )}
-        {convertedText && (
-          <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
-            <Text fontSize="xl">
-              {convertedText || ""}
-            </Text>
-          </Box>
-        )}
+          {inputText !== "" && (
+            <VStack>
+              <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" mr={4}>
+                {!isHurigana1 ? (
+                  <Text fontSize="xl">{text || ""}</Text>
+                ) : (
+                  <Text fontSize="xl">{huriganaText1 || ""}</Text>
+                )}
+                
+              </Box>
+              <Button marginRight={10} width="100%" colorScheme="blue" size="lg" onClick={toggleHurigana1}>
+                ふりがな切り替え
+              </Button>
+            </VStack>
+          )}
+        
+          {convertedText && (
+            <VStack>
+              <Box flex="1" p={4} onMouseUp={handleTextSelection} cursor="text" border="1px solid black" borderRadius="md" bg="gray.100" ml={4}>
+                <Text fontSize="xl">
+                  {!isHurigana2 ? (
+                    <Text fontSize="xl">{convertedText || ""}</Text>
+                  ) : (
+                    <Text fontSize="xl">{huriganaText2 || ""}</Text>
+                  )}
+                </Text>
+              </Box>
+              <Button marginLeft={10} width="100%" colorScheme="blue" size="lg" onClick={toggleHurigana2}>
+                ふりがな切り替え
+              </Button>
+            </VStack>
+          )}
+        
       </Box>
       {/* テキスト選択用モーダル */}
       <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
