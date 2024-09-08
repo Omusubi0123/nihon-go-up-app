@@ -189,34 +189,17 @@ export default function mvp1() {
       {/* 右側の要素 */}
       <Box p={10} display="flex" flexDirection="row" justifyContent="space-between">
         {imageSrc && (
-          <Box flex="1" p={4}>
-            <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded" height="400px" objectFit="cover" />
-          </Box>
-        )}
           <Box display="flex" width="100%" p={4}>
-            {/* 左側のテキスト */}
-            {text !== "" && (
-              <Box
-                flex="1"
-                p={4}
-                onMouseUp={handleTextSelection}
-                cursor="text"
-                border="1px solid black"
-                borderRadius="md"
-                bg="gray.100"
-                mr={2} // 右側のマージン（適宜調整）
-                width="50%"    // 親要素の50%の幅
-                maxWidth="50%" // 親要素の50%の幅に制限
-                // height="40%" // 固定の高さを指定
-                overflowY="auto" // コンテンツが溢れた場合にスクロールを有効化
-              >
-                <Text fontSize="xl">
-                  {text || ""}
-                </Text>
-              </Box>
-            )}
+            {/* 画像を表示するBox */}
+            <Box
+              flex="1"
+              p={4}
+              mr={2} // 右側のマージンを追加（必要に応じて調整）
+            >
+              <Image src={URL.createObjectURL(imageSrc)} alt="Uploaded" height="400px" objectFit="cover" />
+            </Box>
 
-            {/* 右側のテキスト */}
+            {/* convertedTextを表示するBox */}
             {convertedText && (
               <Box
                 flex="1"
@@ -226,10 +209,7 @@ export default function mvp1() {
                 border="1px solid black"
                 borderRadius="md"
                 bg="gray.100"
-                ml={2} // 左側のマージン（適宜調整）
-                width="50%"    // 親要素の50%の幅
-                maxWidth="50%" // 親要素の50%の幅に制限
-                // height="200px" // 固定の高さを指定
+                ml={2} // 左側のマージンを追加（必要に応じて調整）
                 overflowY="auto" // コンテンツが溢れた場合にスクロールを有効化
               >
                 <Text fontSize="xl">
@@ -238,6 +218,54 @@ export default function mvp1() {
               </Box>
             )}
           </Box>
+        )}
+        {!imageSrc && (
+          <Box display="flex" width="100%" p={4}>
+          {/* 左側のテキスト */}
+          {text !== "" && (
+            <Box
+              flex="1"
+              p={4}
+              onMouseUp={handleTextSelection}
+              cursor="text"
+              border="1px solid black"
+              borderRadius="md"
+              bg="gray.100"
+              mr={2} // 右側のマージン（適宜調整）
+              width="50%"    // 親要素の50%の幅
+              maxWidth="40%" // 親要素の50%の幅に制限
+              // height="40%" // 固定の高さを指定
+              overflowY="auto" // コンテンツが溢れた場合にスクロールを有効化
+            >
+              <Text fontSize="xl">
+                {text || ""}
+              </Text>
+            </Box>
+          )}
+
+          {/* 右側のテキスト */}
+          {convertedText && (
+            <Box
+              flex="1"
+              p={4}
+              onMouseUp={handleTextSelection}
+              cursor="text"
+              border="1px solid black"
+              borderRadius="md"
+              bg="gray.100"
+              ml={2} // 左側のマージン（適宜調整）
+              width="50%"    // 親要素の50%の幅
+              maxWidth="0%" // 親要素の50%の幅に制限
+              // height="200px" // 固定の高さを指定
+              overflowY="auto" // コンテンツが溢れた場合にスクロールを有効化
+            >
+              <Text fontSize="xl">
+                {convertedText || ""}
+              </Text>
+            </Box>
+          )}
+        </Box>
+        )}
       </Box>
       {/* テキスト選択用モーダル */}
       <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
