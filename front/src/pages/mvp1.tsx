@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useNavigate } from 'react-router-dom';
 
 export default function mvp1() {
   const { isOpen, onOpen, onClose } = useDisclosure(); // モーダルの制御
@@ -34,8 +35,12 @@ export default function mvp1() {
   const [isHurigana2, setIsHurigana2] = useState(false);
   const [huriganaText1, setHuriganaText1] = useState("");
   const [huriganaText2, setHuriganaText2] = useState(""); 
+  const [mode1, setMode1] = useState(false);
 
-  const handleClick = async () => {
+  const navigate = useNavigate();
+
+  const handleClick = async () => {  
+    setConvertedText("");  // 変換テキストをリセット
     try {
       if (text) {
         const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'convert/', {
@@ -78,6 +83,8 @@ export default function mvp1() {
           const chunk = decoder.decode(value, { stream: true });
           setConvertedText((prev) => prev + chunk);
         }
+
+
       } else {
         console.error('No input text.');
       }
@@ -115,6 +122,7 @@ export default function mvp1() {
   };
 
   const handleModalSubmit = () => {
+    setMode1(false);
     setText(inputText);  // 入力されたテキストを反映
     setImageSrc("");  // 画像を削除
     setImageExtension("");  // 画像の拡張子を削除
@@ -125,6 +133,7 @@ export default function mvp1() {
     if (inputFileRef.current) {
       inputFileRef.current.click();
     }
+    setMode1(true);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -210,6 +219,10 @@ export default function mvp1() {
   };
   
 
+  const gotoOutput = () => {
+    navigate('/output');  // "/about" へ画面遷移
+  };
+
   return (
     <HStack spacing={0} align="stretch" minHeight={"100vh"}>
       <VStack
@@ -228,7 +241,7 @@ export default function mvp1() {
           onChange={handleFileChange}
         />
         <Button width="100%" colorScheme="blue" size="lg" onClick={onOpen}>
-          文章を入力する
+          文章をうつ
         </Button>
         <Input
           type="file"
@@ -241,12 +254,19 @@ export default function mvp1() {
           画像をアップロード
         </Button>
         <Button width="100%" colorScheme="blue" size="lg" onClick={handleClick}>
-          文章変換
+          かんたんにする
+        </Button>
+        <Button width="100%" colorScheme="blue" size="lg" onClick={handleClick}>
+          画像を文字にする
+        </Button>
+        <Button width="100%" size="lg" bg="orange" colorScheme="teal" onClick={gotoOutput}>
+          書くモード
         </Button>
       </VStack>
       {/* 右側の要素 */}
       <Box p={10} display="flex" flexDirection="row" justifyContent="space-between">
-        {imageSrc && (
+
+        {imageSrc &&  mode1 && (
           <Box display="flex" width="100%" p={4}>
             {/* 画像を表示するBox */}
             <Box
@@ -258,7 +278,7 @@ export default function mvp1() {
             </Box>
 
             {/* convertedTextを表示するBox */}
-            {convertedText && (
+            {/* {convertedText && (
               <Box
                 flex="1"
                 p={4}
@@ -274,9 +294,11 @@ export default function mvp1() {
                   {convertedText || ""}
                 </Text>
               </Box>
-            )}
+            )} */}
           </Box>
         )}
+
+
           {inputText !== "" && (
             <VStack width="50%">
               <Box 
@@ -303,7 +325,7 @@ export default function mvp1() {
           )}
         
           {convertedText && (
-            <VStack width="50%">
+            <VStack width="100%">
               <Box 
                 flex="1" 
                 p={4} 
@@ -357,10 +379,10 @@ export default function mvp1() {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>文章を入力してください</ModalHeader>
+          <ModalHeader>文章を打ってください</ModalHeader>
           <ModalBody>
             <Textarea
-              placeholder="文章をここに入力"
+              placeholder="文章をここに打つ"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               size="lg"
