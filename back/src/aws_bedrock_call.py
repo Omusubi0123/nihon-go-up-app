@@ -1,8 +1,11 @@
 import base64
 import json
-import sys
+from typing import Generator, Literal
 
 import boto3
+
+from src.prompts.image_prompt import DESCRIPT_IMAGE_PROMPT, OCR_IMAGE_PROMPT
+from src.settings import Settings
 
 
 def local_image_to_data(image_path: str) -> str:
@@ -11,26 +14,34 @@ def local_image_to_data(image_path: str) -> str:
     return b64_image_data
 
 
-def create_body(prompt: str, image_path: str | None = None) -> str:
+def create_body(
+    image_bytes: bytes,
+    mediatype: Literal["jpeg", "png"],
+    mode: Literal["descript", "ocr"],
+) -> str:
+    if mode == "descript":
+        prompt = DESCRIPT_IMAGE_PROMPT
+    elif mode == "ocr":
+        prompt = OCR_IMAGE_PROMPT
+    else:
+        raise ValueError("mode must be 'descript' or 'ocr'")
     messages = [
         {"role": "user", "content": [{"type": "text", "text": prompt}]},
     ]
-    if image_path:
-        b64_image_data = local_image_to_data(image_path)
-        messages[0]["content"].append(
-            {
-                "type": "image",
-                "source": {
-                    "type": "base64",
-                    "media_type": "image/jpeg",
-                    "data": b64_image_data,
-                },
-            }
-        )
+    messages[0]["content"].append(
+        {
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": f"image/{mediatype}",
+                "data": base64.b64encode(image_bytes).decode("utf-8"),
+            },
+        }
+    )
     body = json.dumps(
         {
             "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 1000,
+            "max_tokens": 4000,
             "temperature": 0.5,
             "messages": messages,
         }
@@ -38,15 +49,16 @@ def create_body(prompt: str, image_path: str | None = None) -> str:
     return body
 
 
-def aws_bedrock_call(prompt: str, image_path: str | None = None):
-    session = boto3.Session(profile_name="llm-user011")
+def aws_bedrock_call(
+    body: str,
+) -> Generator[str, None, None]:
+    settings = Settings()
+    session = boto3.Session(profile_name=settings.aws_username)
     client = session.client(service_name="bedrock-runtime", region_name="us-east-1")
-
     response = client.invoke_model_with_response_stream(
         modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
-        body=create_body(prompt, image_path),
+        body=body,
     )
-
     stream = response.get("body")
     if stream:
         for event in stream:
@@ -57,11 +69,13 @@ def aws_bedrock_call(prompt: str, image_path: str | None = None):
                     "delta", {}
                 ).get("text")
                 if content:
-                    print(content, end="")
-                    sys.stdout.flush()
+                    yield content
 
 
 if __name__ == "__main__":
-    prompt = "画像の状況を、大正の文豪のような文章で表現してください。"
-    image_path = "/Users/andohikaru/Desktop/情報理工ハッカソン/FastAPI_sample/app/data/ando.jpeg"
-    aws_bedrock_call(prompt, image_path)
+    import sys
+
+    image_path = "data/kakudai.png"
+    b64_image_data = local_image_to_data(image_path)
+    body = create_body(b64_image_data, "png", "ocr")
+    aws_bedrock_call(body)

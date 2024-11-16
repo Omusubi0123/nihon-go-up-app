@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Literal, Optional
 
+from fastapi import File, Form, UploadFile
 from pydantic import BaseModel
 
 
@@ -14,14 +15,15 @@ class User(BaseModel):
     age: int
 
 
-class Cotomi(BaseModel):
-    prompt: str
+class Text(BaseModel):
+    text: str
 
 
 class TextComplexity(BaseModel):
     raw_text: str
-    mode: str
+    mode: Literal["easy", "hard"]
 
 
-class Base64Image(BaseModel):
-    b64_image_data: bytes
+class ImageData(BaseModel):
+    image: UploadFile = File(...)
+    mediatype: str
