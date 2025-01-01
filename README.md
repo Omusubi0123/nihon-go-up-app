@@ -2,9 +2,9 @@
 
 UMP-JUST主催の「生成AIハッカソン」での作品です．backendを担当しました．
 
-<div style="text-align: center;">
+<p align="center">
     <img src="material/page_title.png" alt="Title Image" width="80%">
-</div>
+</p>
 
 ## 環境構築
 1. 以下のサービスに登録してAPIキーを取得
@@ -54,11 +54,11 @@ UMP-JUST主催の「生成AIハッカソン」での作品です．backendを担
 
 
 ## 作品の概要
-<div style="text-align: center;">
+<p align="center">
     <img src="material/page_1.png" alt="Title Image" width="80%">
     <img src="material/page_2.png" alt="Title Image" width="80%">
     <img src="material/page_3.png" alt="Title Image" width="80%">
     <img src="material/page_4.png" alt="Title Image" width="80%">
     <img src="material/page_5.png" alt="Title Image" width="80%">
     <img src="material/page_6.png" alt="Title Image" width="80%">
-</div>
+</p>
