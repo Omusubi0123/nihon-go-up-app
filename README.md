@@ -2,7 +2,9 @@
 
 UMP-JUST主催の「生成AIハッカソン」での作品です．backendを担当しました．
 
-<img src="material/page_title.png" alt="Title Image" width="80%">
+<div style="text-align: center;">
+    <img src="material/page_title.png" alt="Title Image" width="80%">
+</div>
 
 ## 環境構築
 1. 以下のサービスに登録してAPIキーを取得
@@ -10,8 +12,8 @@ UMP-JUST主催の「生成AIハッカソン」での作品です．backendを担
     - AWS Bedrock
     - Azure AI search
 2. backend: `back/`直下に`.env`を作成
-    実行に必要なのはCotomi関連の3つ，AWS関連の4つ，Azure AI Search関連の2つのAPIキー．
-    それ以外は空白でOK．
+    - 実行に必要なのはCotomi関連の3つ，AWS関連の4つ，Azure AI Search関連の2つのAPIキー．
+    - それ以外は空白でOK．
     ```
     COTOMI_API_KEY=
     COTOMI_BASE_URL=
@@ -52,10 +54,11 @@ UMP-JUST主催の「生成AIハッカソン」での作品です．backendを担
 
 
 ## 作品の概要
-<img src="material/page_1.png" alt="Title Image" width="80%">
-<img src="material/page_2.png" alt="Title Image" width="80%">
-<img src="material/page_3.png" alt="Title Image" width="80%">
-<img src="material/page_4.png" alt="Title Image" width="80%">
-<img src="material/page_5.png" alt="Title Image" width="80%">
-<img src="material/page_6.png" alt="Title Image" width="80%">
-
+<div style="text-align: center;">
+    <img src="material/page_1.png" alt="Title Image" width="80%">
+    <img src="material/page_2.png" alt="Title Image" width="80%">
+    <img src="material/page_3.png" alt="Title Image" width="80%">
+    <img src="material/page_4.png" alt="Title Image" width="80%">
+    <img src="material/page_5.png" alt="Title Image" width="80%">
+    <img src="material/page_6.png" alt="Title Image" width="80%">
+</div>
