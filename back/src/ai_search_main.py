@@ -17,8 +17,8 @@ def main(
     delete: bool = False,
     upload: bool = False,
     search: bool = True,
-    load_path: str = os.path.join("data", "filesearch", "dog_use_100.json"),
-    save_path: str = os.path.join("data", "filesearch", "dog_use_vector_100.json"),
+    load_path: str = os.path.join("data", "filesearch", "dog_use.json"),
+    save_path: str = os.path.join("data", "filesearch", "dog_use_vector.json"),
 ):
     """AI Searchのメイン処理
 
