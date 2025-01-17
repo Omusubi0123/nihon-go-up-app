@@ -1,7 +1,4 @@
-from openai import AzureOpenAI
-
 from src.ai_search_support import hybrid_search
-from src.settings import Settings
 
 
 def ai_search_call(
@@ -18,17 +15,7 @@ def ai_search_call(
         load_path (str, optional): ドキュメントのjsonファイルパス. Defaults to os.path.join("ai_search", "data", "filesearch", "filesearch_data.json").
         save_path (str, optional): ベクトル埋め込み付きドキュメントデータのファイルパス. Defaults to os.path.join("ai_search", "data", "filesearch", "filesearch_vector.json").
     """
-    settings = Settings()
-
-    client = AzureOpenAI(
-        api_key=settings.azure_embedding_api_key,
-        api_version=settings.azure_openai_version,
-        azure_endpoint=settings.azure_openai_endpoint,
-    )
-
-    results = hybrid_search(
-        client, index_name, query, settings, model=settings.azure_embedding_modelname
-    )
+    results = hybrid_search(index_name, query, top=30)
 
     result_dict: dict[str, list] = {
         "id": [],
