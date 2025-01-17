@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ChakraProvider>
       <Router basename="/">
         <Routes>
-          <Route path="/" element={<Mvp1 />} />
+          <Route path="/input" element={<Mvp1 />} />
           <Route path="/output" element={<Mvp2 />} />
         </Routes>
       </Router>

@@ -19,27 +19,28 @@ import ReactMarkdown from 'react-markdown';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 const imagePaths = [
-    'data/1.jpeg',
-    'data/2.jpeg',
-    'data/3.jpeg',
-    'data/4.jpeg',
-    'data/5.jpeg',
-    'data/6.jpeg',
-    'data/7.jpeg',
-    'data/8.jpeg',
-    'data/9.jpeg',
-    'data/10.jpeg',
-    'data/11.jpeg',
-    'data/12.jpeg',
-    'data/13.jpeg',
-    'data/14.jpeg',
-    'data/15.jpeg',
-    'data/16.jpeg',
-    'data/17.jpeg',
-    'data/18.jpeg',
-    'data/19.jpeg',
-    'data/20.jpeg',
-  ];
+  '/data/1.jpeg',
+  '/data/2.jpeg',
+  '/data/3.jpeg',
+  '/data/4.jpeg',
+  '/data/5.jpeg',
+  '/data/6.jpeg',
+  '/data/7.jpeg',
+  '/data/8.jpeg',
+  '/data/9.jpeg',
+  '/data/10.jpeg',
+  '/data/11.jpeg',
+  '/data/12.jpeg',
+  '/data/13.jpeg',
+  '/data/14.jpeg',
+  '/data/15.jpeg',
+  '/data/16.jpeg',
+  '/data/17.jpeg',
+  '/data/18.jpeg',
+  '/data/19.jpeg',
+  '/data/20.jpeg',
+];
+
 export default function Mvp2() {
   const { isOpen: isOpenModal1, onOpen: onOpenModal1, onClose: onCloseModal1 } = useDisclosure(); // モーダルの制御
   const { isOpen: isOpenModal2, onOpen: onOpenModal2, onClose: onCloseModal2 } = useDisclosure(); // モーダルの制御
@@ -78,8 +79,8 @@ export default function Mvp2() {
         const fileName = "sample.png";
         formData.append('image', file, fileName);
         formData.append('mediatype', imageExtension);
-        formData.append('llm_description', imageExtension);
-        formData.append('user_description', imageExtension);
+        formData.append('llm_description', convertedText);
+        formData.append('user_description', inputText);
         const requestOptions = {
           method: "POST",
           body: formData,
@@ -311,7 +312,7 @@ export default function Mvp2() {
   };
 
   const gotoOutput = () => {
-    navigate('/');  // "/about" へ画面遷移
+    navigate('/input');  // "/about" へ画面遷移
   };
 
   return (
