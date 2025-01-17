@@ -3,9 +3,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    cotomi_api_key: str = Field(..., env="COTOMI_API_KEY")
-    cotomi_base_url: str = Field(..., env="COTOMI_BASE_URL")
-    cotomi_model: str = Field(..., env="COTOMI_MODEL")
+    openai_api_key: str = Field(..., env="OPENAI_API_KEY")
+    openai_model: str = Field(..., env="OPENAI_MODEL")
 
     aws_username: str = Field(..., env="AWS_USERNAME")
     aws_password: str = Field(..., env="AWS_PASSWORD")

@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from starlette.responses import StreamingResponse
 
 from app.schemas import TextComplexity
-from src.cotomi_call import cotomi_call
+from src.openai_call import openai_call
 from src.prompts.vocabulary_prompt import (
     TO_EASY_VOCABULARY_PROMPT,
     TO_HARD_VOCABULARY_PROMPT,
@@ -37,4 +37,4 @@ router = APIRouter()
 @router.post("/")
 def flex_complexity_text_response(data: TextComplexity):
     messages = create_messages(data.raw_text, data.mode)
-    return StreamingResponse(cotomi_call(messages), media_type="text/event-stream")
+    return StreamingResponse(openai_call(messages), media_type="text/event-stream")

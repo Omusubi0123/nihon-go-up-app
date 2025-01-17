@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from starlette.responses import StreamingResponse
 
 from app.schemas import Text
-from src.cotomi_call import cotomi_call
+from src.openai_call import openai_call
 from src.prompts.vocabulary_prompt import HURIGANA_PROMPT
 
 
@@ -26,4 +26,4 @@ router = APIRouter()
 @router.post("/")
 def hurigana_response(data: Text):
     messages = create_messages(data.text)
-    return StreamingResponse(cotomi_call(messages), media_type="text/event-stream")
+    return StreamingResponse(openai_call(messages), media_type="text/event-stream")
