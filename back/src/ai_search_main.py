@@ -1,7 +1,6 @@
 import os
 
-import fire  # type: ignore
-from openai import AzureOpenAI
+import fire
 
 from src.ai_search_support import (
     create_index,
@@ -10,7 +9,6 @@ from src.ai_search_support import (
     hybrid_search,
     upload_documents,
 )
-from src.settings import Settings
 
 
 def main(
@@ -25,40 +23,23 @@ def main(
     """AI Searchのメイン処理
 
     Args:
-        index_name (str): Index名
         create (bool, optional): Indexを作成するか. Defaults to False.
         upload (bool, optional): Indexにドキュメントを追加するか. Defaults to False.
         search (bool, optional): AI searchの検索を行うか. Defaults to True.
         load_path (str, optional): ドキュメントのjsonファイルパス. Defaults to os.path.join("ai_search", "data", "filesearch", "filesearch_data.json").
         save_path (str, optional): ベクトル埋め込み付きドキュメントデータのファイルパス. Defaults to os.path.join("ai_search", "data", "filesearch", "filesearch_vector.json").
     """
-    settings = Settings()
-
-    client = AzureOpenAI(
-        api_key=settings.azure_embedding_api_key,
-        api_version=settings.azure_openai_version,
-        azure_endpoint=settings.azure_openai_endpoint,
-    )
-
     if create:
-        create_index(index_name, settings)
+        create_index(index_name)
     if delete:
-        delete_index(index_name, settings)
+        delete_index(index_name)
     if upload:
-        create_index_documents(
-            client, load_path, save_path, model=settings.azure_embedding_modelname
-        )
-        upload_documents(index_name, save_path, settings)
+        create_index_documents(load_path, save_path)
+        upload_documents(index_name, save_path)
     if search:
         while True:
             query = input("Q: ")
-            results = hybrid_search(
-                client,
-                index_name,
-                query,
-                settings,
-                model=settings.azure_embedding_modelname,
-            )
+            results = hybrid_search(index_name, query, top=30)
 
             result_dict: dict[str, list] = {
                 "id": [],
@@ -79,4 +60,5 @@ if __name__ == "__main__":
     import json
 
     fire.Fire(main)
+
 # poetry run python src/ai_search_main.py --index_name=doc_image_retrieval

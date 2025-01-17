@@ -17,14 +17,20 @@ from azure.search.documents.indexes.models import (
     VectorSearch,
 )
 from azure.search.documents.models import Vector
-from openai import AzureOpenAI
+from openai import OpenAI
 
-from src.settings import Settings
+from src.settings import settings
+
+client = OpenAI(api_key=settings.openai_api_key)
+
+search_index_client = SearchIndexClient(
+    settings.azure_ai_search_endpoint,
+    AzureKeyCredential(settings.azure_ai_search_api_key),
+)
 
 
 def create_index(
     index_name: str,
-    settings: Settings,
     embd_content: bool = True,
     search_dimensions: int = 3072,
 ):
@@ -32,17 +38,9 @@ def create_index(
 
     Args:
         index_name (str): Index名
-        settings (Settings): 設定
-        field_category (bool, optional): category fieldを追加するか. Defaults to True.
-        embd_title (bool, optional): title(ファイルパス)をembeddingするか. Defaults to True.
         embd_content (bool, optional): content(全文)をembeddingするか. Defaults to False.
-        embd_summary (bool, optional): summaryをembeddingするか. Defaults to False.
         search_dimensions (int, optional): embeddingの次元数. Defaults to 3072 (text-embedding-3-largeの出力次元数).
     """
-    search_client = SearchIndexClient(
-        settings.azure_ai_search_endpoint,
-        AzureKeyCredential(settings.azure_ai_search_api_key),
-    )
     fields = [
         SimpleField(name="id", type=SearchFieldDataType.String, key=True),
         SearchableField(
@@ -97,60 +95,46 @@ def create_index(
         semantic_settings=semantic_settings,
     )
 
-    result = search_client.create_index(index)
+    result = search_index_client.create_index(index)
     print(f" <{result.name} created>")
     return result
 
 
-def delete_index(index_name: str, settings: Settings):
+def delete_index(index_name: str):
     """Indexを削除
 
     Args:
         index_name (str): Index名
-        settings (Settings): 設定
     """
-    search_client = SearchIndexClient(
-        settings.azure_ai_search_endpoint,
-        AzureKeyCredential(settings.azure_ai_search_api_key),
-    )
-    result = search_client.delete_index(index_name)
+    result = search_index_client.delete_index(index_name)
     print(f" <{index_name} deleted>")
     return result
 
 
-def generate_embeddings(client: AzureOpenAI, text: str, model: str):
+def generate_embeddings(text: str, model: str):
     """embeddingを行う
 
     Args:
-        client (openai.OpenAI): OpenAIのクライアント
         text (str): embeddingしたい文章
         model (str): embeddingモデル名
     """
     text = text.replace("\n", " ")
-    response = client.embeddings.create(
-        input=text, model=model  # text-embedding-ada-002 のデプロイ名
-    )
+    response = client.embeddings.create(input=text, model=model)
     return response.data[0].embedding
 
 
 def create_index_documents(
-    client: AzureOpenAI,
     load_path: str,
     save_path: str,
-    model: str = "text-embedding-3-large",
     embd_content: bool = True,
 ):
     """Indexに登録するドキュメントを作成
        title(ファイルパス), content(全文)をキーに持つjsonが存在していることを前提とする
 
     Args:
-        client (openai.OpenAI): OpenAIのクライアント
         load_path (str): ドキュメントのjsonファイルパス
         save_path (str): 生成したドキュメントのjsonファイルパス
-        model (str, optional): embeddingモデル名. Defaults to "text-embedding-3-large".
-        embd_title (bool, optional): titleをembeddingするか. Defaults to True.
         embd_content (bool, optional): contentをembeddingするか. Defaults to False.
-        embd_summary (bool, optional): summaryをembeddingするか. Defaults to False.
     """
     with open(load_path, "r", encoding="utf-8") as f:
         documents = json.load(f)
@@ -159,7 +143,9 @@ def create_index_documents(
         print(f"Processing: {i}")
         if embd_content:
             content = document["content"]
-            content_embeddings = generate_embeddings(client, content, model)
+            content_embeddings = generate_embeddings(
+                client, content, settings.openai_embedding_model
+            )
             document["contentVector"] = content_embeddings
         if i % 100 == 0:
             with open(save_path, "w") as f:
@@ -169,15 +155,12 @@ def create_index_documents(
         json.dump(documents, f, ensure_ascii=False, indent=4)
 
 
-def upload_documents(
-    index_name: str, doc_path: str, settings: Settings, batch_size: int = 100
-):
+def upload_documents(index_name: str, doc_path: str, batch_size: int = 100):
     """Indexにドキュメントをアップロード
 
     Args:
         index_name (str): Index名
         doc_path (str): ドキュメントのjsonファイルパス
-        settings: 設定
         batch_size (int, optional): アップロードするドキュメント数のバッチサイズ. Defaults to 100.
     """
     search_client = SearchClient(
@@ -194,44 +177,31 @@ def upload_documents(
 
 
 def hybrid_search(
-    client: AzureOpenAI,
     index_name: str,
     query: str,
-    settings: Settings,
     vector_content: bool = True,
-    custom_embedding: list[float] | None = None,
-    model: str = "text-embedding-3-large",
     top: int = 30,
 ):
     """Azure Hybrid Search
 
     Args:
-        client (OpenAI): OpenAIのクライアント
         index_name (str): Index名
         query (str): 検索クエリ
-        settings: 設定
-        vector_title (bool, optional): titleをembeddingして検索するか. Defaults to True.
-        vector_summary (bool, optional): summaryをembeddingして検索するか. Defaults to False.
-        model (str, optional): embeddingモデル名. Defaults to "text-embedding-3-large".
+        vector_content (bool, optional): queryをembeddingして検索するか. Defaults to False.
         top (int, optional): 結果取得数. Defaults to 10.
 
     Returns:
         _type_: 検索結果
     """
-    credential = AzureKeyCredential(settings.azure_ai_search_api_key)
     search_client = SearchClient(
         endpoint=settings.azure_ai_search_endpoint,
         index_name=index_name,
-        credential=credential,
+        credential=AzureKeyCredential(settings.azure_ai_search_api_key),
     )
 
     vectors = []
     if vector_content:
-        if not custom_embedding:
-            query_embd = generate_embeddings(client, query, model)
-        else:
-            query_embd = custom_embedding
-    if vector_content:
+        query_embd = generate_embeddings(client, query, settings.openai_embedding_model)
         vectors.append(
             Vector(
                 value=query_embd,
