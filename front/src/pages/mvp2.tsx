@@ -570,7 +570,7 @@ export default function Mvp2() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
+      <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal()}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>選択されたテキスト</ModalHeader>
@@ -587,7 +587,7 @@ export default function Mvp2() {
             <Button bg="green" colorScheme="blue" mr={3} onClick={() => handleGetDetail()}>
               単語の意味を調べる
             </Button>
-            <Button bg="green" colorScheme="blue" mr={3} onClick={() => handleCloseModal(false)}>
+            <Button bg="green" colorScheme="blue" mr={3} onClick={() => handleCloseModal()}>
               閉じる
             </Button>
           </ModalFooter>

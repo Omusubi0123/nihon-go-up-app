@@ -124,7 +124,7 @@ export default function mvp1() {
   const handleModalSubmit = () => {
     setMode1(false);
     setText(inputText);  // 入力されたテキストを反映
-    setImageSrc("");  // 画像を削除
+    setImageSrc(undefined);  // 画像を削除
     setImageExtension("");  // 画像の拡張子を削除
     onClose();  // モーダルを閉じる
   };
@@ -352,7 +352,7 @@ export default function mvp1() {
           )}
       </Box>
       {/* テキスト選択用モーダル */}
-      <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal(false)}>
+      <Modal isOpen={isTextModalOpen} onClose={() => handleCloseModal()}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>選択されたテキスト</ModalHeader>
@@ -369,7 +369,7 @@ export default function mvp1() {
             <Button colorScheme="blue" mr={3} onClick={() => handleGetDetail()}>
               単語の意味を調べる
             </Button>
-            <Button colorScheme="blue" mr={3} onClick={() => handleCloseModal(false)}>
+            <Button colorScheme="blue" mr={3} onClick={() => handleCloseModal()}>
               閉じる
             </Button>
           </ModalFooter>
