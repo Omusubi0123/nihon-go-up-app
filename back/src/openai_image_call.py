@@ -3,7 +3,11 @@ from typing import Any, Generator, Literal
 
 from openai import OpenAI
 
-from src.prompts.image_prompt import DESCRIPT_IMAGE_PROMPT, OCR_IMAGE_PROMPT
+from src.prompts.image_prompt import (
+    COMPARE_IMAGE_DESCRIPTION_PROMPT,
+    DESCRIPT_IMAGE_PROMPT,
+    OCR_IMAGE_PROMPT,
+)
 from src.settings import settings
 
 client = OpenAI(api_key=settings.openai_api_key)
@@ -18,7 +22,7 @@ def create_messages(
     b64_image_data: bytes,
     mediatype: Literal["jpeg", "png"],
     mode: Literal["descript", "ocr"],
-) -> str:
+) -> list[dict[str, Any]]:
     if mode == "descript":
         prompt = DESCRIPT_IMAGE_PROMPT
     elif mode == "ocr":
@@ -36,7 +40,7 @@ def create_messages(
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/{mediatype};base64,{b64_image_data}"
+                        "url": f"data:image/{mediatype};base64,{b64_image_data}"  # type: ignore
                     },
                 },
             ],
@@ -45,15 +49,12 @@ def create_messages(
     return messages
 
 
-from src.prompts.image_prompt import COMPARE_IMAGE_DESCRIPTION_PROMPT
-
-
 def create_compare_messages(
     b64_image_data: bytes,
     mediatype: Literal["jpeg", "png"],
     llm_description: str,
     user_description: str,
-) -> str:
+) -> list[dict[str, Any]]:
     prompt = COMPARE_IMAGE_DESCRIPTION_PROMPT.format(
         llm_description=llm_description,
         user_description=user_description,
@@ -70,7 +71,7 @@ def create_compare_messages(
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/{mediatype};base64,{b64_image_data}"
+                        "url": f"data:image/{mediatype};base64,{b64_image_data}"  # type: ignore
                     },
                 },
             ],
@@ -82,24 +83,23 @@ def create_compare_messages(
 def openai_image_call(messages: list[dict[str, Any]]) -> Generator[str, None, None]:
     response = client.chat.completions.create(
         model=settings.openai_model,
-        messages=messages,
+        messages=messages,  # type: ignore
         max_tokens=2000,
         top_p=0.95,
         frequency_penalty=0,
         presence_penalty=0,
-        stop=None,
         stream=True,
         timeout=100,
     )
 
     for chunk in response:
-        content = chunk.choices[0].delta.content
+        content = chunk.choices[0].delta.content  # type: ignore
         if type(content) == str:
             yield content
 
 
 if __name__ == "__main__":
-    image_path = "data/kakudai.png"
+    image_path = "data/dog_use/1.jpeg"
     b64_image_data = local_image_to_data(image_path)
-    messages = create_messages(b64_image_data, "png", "ocr")
+    messages = create_messages(b64_image_data, "jpeg", "descript")  # type: ignore
     openai_image_call(messages)

@@ -144,7 +144,7 @@ def create_index_documents(
         if embd_content:
             content = document["content"]
             content_embeddings = generate_embeddings(
-                client, content, settings.openai_embedding_model
+                content, settings.openai_embedding_model
             )
             document["contentVector"] = content_embeddings
         if i % 100 == 0:
@@ -201,7 +201,7 @@ def hybrid_search(
 
     vectors = []
     if vector_content:
-        query_embd = generate_embeddings(client, query, settings.openai_embedding_model)
+        query_embd = generate_embeddings(query, settings.openai_embedding_model)
         vectors.append(
             Vector(
                 value=query_embd,

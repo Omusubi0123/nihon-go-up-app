@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, File, Form, UploadFile
 from starlette.responses import StreamingResponse
 
@@ -9,7 +11,7 @@ router = APIRouter()
 @router.post("/")
 async def compare_user_and_llm_image_description_response(
     image: UploadFile = File(...),
-    mediatype: str = Form(...),
+    mediatype: Literal["jpeg", "png"] = Form(...),
     llm_description: str = Form(...),
     user_description: str = Form(...),
 ):

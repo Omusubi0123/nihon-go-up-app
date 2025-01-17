@@ -2,6 +2,7 @@ import ast
 import base64
 import json
 from glob import glob
+from typing import Any
 
 from openai import OpenAI
 
@@ -11,14 +12,14 @@ from src.settings import settings
 client = OpenAI(api_key=settings.openai_api_key)
 
 
-def local_image_to_data(image_path: str) -> bytes:
+def local_image_to_data(image_path: str) -> str:
     with open(image_path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
 
 def create_messages(
     b64_image_data: bytes,
-) -> str:
+) -> list[dict[str, Any]]:
     messages = [
         {
             "role": "user",
@@ -26,7 +27,7 @@ def create_messages(
                 {"type": "text", "text": IMAGE_TO_TEXT_FOR_RAG_PROMPT},
                 {
                     "type": "image_url",
-                    "image_url": {"url": f"data:image/jpeg;base64,{b64_image_data}"},
+                    "image_url": {"url": f"data:image/jpeg;base64,{b64_image_data}"},  # type: ignore
                 },
             ],
         },
@@ -34,15 +35,14 @@ def create_messages(
     return messages
 
 
-def llm_process_image(b64_image_data: bytes) -> dict[str, str]:
-    response = client.chat.completions.create(
+def llm_process_image(b64_image_data: bytes) -> dict[str, Any]:
+    response = client.chat.completions.create(  # type: ignore
         model=settings.openai_model,
         messages=create_messages(b64_image_data),
         max_tokens=2000,
         top_p=0.95,
         frequency_penalty=0,
         presence_penalty=0,
-        stop=None,
         stream=True,
         timeout=100,
         response_format={"type": "json_object"},
@@ -59,14 +59,14 @@ def llm_process_image(b64_image_data: bytes) -> dict[str, str]:
 
 
 def main(
-    image_paths: str = glob("data/dog_use/*.jpeg"),
+    image_paths: str = "data/dog_use/*.jpeg",
     save_path: str = "data/filesearch/dog_use.json",
 ):
     image_and_text = []
-    for image_path in image_paths:
+    for image_path in glob(image_paths):
         print("\nprocessing image:", image_path)
         b64_image_data = local_image_to_data(image_path)
-        response_json = llm_process_image(b64_image_data)
+        response_json = llm_process_image(b64_image_data)  # type: ignore
 
         image_and_text.append(
             {

@@ -15,7 +15,9 @@ from src.prompts.vocabulary_prompt import (
 )
 
 
-def create_convert_messages(raw_text: str, mode: Literal["easy", "hard"]):
+def create_convert_messages(
+    raw_text: str, mode: Literal["easy", "hard"]
+) -> list[dict[str, Any]]:
     if mode == "easy":
         prompt = TO_EASY_VOCABULARY_PROMPT.format(difficult_text=raw_text)
     elif mode == "hard":
@@ -35,7 +37,9 @@ def create_convert_messages(raw_text: str, mode: Literal["easy", "hard"]):
     return messages
 
 
-def create_messages(raw_text: str, mode: Literal["hurigana", "term_and_mean"]):
+def create_messages(
+    raw_text: str, mode: Literal["hurigana", "term_and_mean"]
+) -> list[dict[str, Any]]:
     if mode == "hurigana":
         prompt = HURIGANA_PROMPT.format(raw_text=raw_text)
     elif mode == "term_and_mean":
@@ -59,18 +63,17 @@ def create_messages(raw_text: str, mode: Literal["hurigana", "term_and_mean"]):
 def openai_call(messages: list[dict[str, Any]]) -> Generator[str, None, None]:
     response = client.chat.completions.create(
         model=settings.openai_model,
-        messages=messages,
+        messages=messages,  # type: ignore
         temperature=0.7,
         max_tokens=2000,
         top_p=0.95,
         frequency_penalty=0,
         presence_penalty=0,
-        stop=None,
         stream=True,
         timeout=100,
     )
 
     for chunk in response:
-        content = chunk.choices[0].delta.content
+        content = chunk.choices[0].delta.content  # type: ignore
         if type(content) == str:
             yield content

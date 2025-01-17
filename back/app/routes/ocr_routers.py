@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, File, Form, UploadFile
 from starlette.responses import StreamingResponse
 
@@ -9,7 +11,7 @@ router = APIRouter()
 @router.post("/")
 async def ocr_image_response(
     image: UploadFile = File(...),
-    mediatype: str = Form(...),
+    mediatype: Literal["jpeg", "png"] = Form(...),
 ):
     image_bytes = await image.read()
     message = create_messages(image_bytes, mediatype, "ocr")

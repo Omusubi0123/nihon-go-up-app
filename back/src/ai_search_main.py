@@ -1,6 +1,5 @@
+import json
 import os
-
-import fire
 
 from src.ai_search_support import (
     create_index,
@@ -58,8 +57,8 @@ def main(
 
 
 if __name__ == "__main__":
-    import json
+    from fire import Fire  # type: ignore
 
-    fire.Fire(main)
+    Fire(main)
 
 # poetry run python src/ai_search_main.py --index_name=doc_image_retrieval
