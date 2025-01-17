@@ -43,7 +43,7 @@ export default function mvp1() {
     setConvertedText("");  // 変換テキストをリセット
     try {
       if (text) {
-        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'convert/', {
+        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + '/convert/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -73,7 +73,7 @@ export default function mvp1() {
           body: formData,
         };
 
-        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'ocr/', requestOptions);
+        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + '/ocr/', requestOptions);
         console.log("response: ", response);
         const reader = response.body?.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -98,7 +98,7 @@ export default function mvp1() {
 
   const handleGetDetail = async () => {
     try {
-      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'meaning/', {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + '/meaning/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -165,7 +165,7 @@ export default function mvp1() {
 
   const postHurigana = async (targetText: string, huriganaIdx: number) => {
     try {
-      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'hurigana/', {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + '/hurigana/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

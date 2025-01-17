@@ -6,11 +6,11 @@ services:
     container_name: nihon-go-up-app-backend
     working_dir: /backend
     volumes:
-      - ./app:./app
-      - ./src:./src
+      - ./app:/backend/app
+      - ./src:/backend/src
     ports:
       - "6000:6000" # ホストの port 8000 は別のサービスで使用しているため、6000 でアクセス
-    command: poetry run uvicorn app.main:server --host 0.0.0.0 --port 6000 --reload --forwarded-allow-ips="*"
+    command: poetry run uvicorn app.main:app --host 0.0.0.0 --port 6000 --reload --forwarded-allow-ips="*"
     networks:
       - nihon-go-up-app_cloudflared_network
     depends_on:
@@ -21,7 +21,7 @@ services:
     image: nginx:latest
     container_name: nihon-go-up-app-nginx
     ports:
-      - "8080:6000"  # 外部からのアクセスは6000ポートを使用
+      - "8081:6000"  # 外部からのアクセスは6000ポートを使用
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:

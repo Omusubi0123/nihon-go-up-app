@@ -84,7 +84,7 @@ export default function Mvp2() {
           method: "POST",
           body: formData,
         };
-        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'compare/', requestOptions);
+        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + '/compare/', requestOptions);
 
         console.log("response: ", response);
         const reader = response.body?.getReader();
@@ -117,7 +117,7 @@ export default function Mvp2() {
         };
         console.log("descript API呼び出し");
         console.log(`mediatype: ${imageExtension}`);
-        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'descript/', requestOptions);
+        const response = await fetch(import.meta.env.VITE_FASTAPI_URL + '/descript/', requestOptions);
         console.log(response);
         const reader = response.body?.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -140,7 +140,7 @@ export default function Mvp2() {
 
   const handleGetDetail = async () => {
     try {
-      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'meaning/', {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + '/meaning/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -167,7 +167,7 @@ export default function Mvp2() {
   const handleModalSubmitRAG = async () => {
     try {
       const response = await fetch(
-        import.meta.env.VITE_FASTAPI_URL + 'ai_search/', {
+        import.meta.env.VITE_FASTAPI_URL + '/ai_search/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -231,7 +231,7 @@ export default function Mvp2() {
 
   const postHurigana = async (targetText: string, huriganaIdx: number) => {
     try {
-      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'hurigana/', {
+      const response = await fetch(import.meta.env.VITE_FASTAPI_URL + '/hurigana/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

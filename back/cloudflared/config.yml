@@ -3,9 +3,7 @@ credentials-file: /etc/cloudflared/"tunnel_id".json
 
 
 ingress:
-  - hostname: nihon-go-up-app.omusubiy.com
+  - hostname: "my-subdomain.com"
     service: http://nihon-go-up-app-nginx:6000
-    originRequest:
-      noTLSVerify: true
   - service: http_status:404
   
