@@ -8,7 +8,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ChakraProvider>
-      <Router basename="/team1">
+      <Router basename="/">
         <Routes>
           <Route path="/" element={<Mvp1 />} />
           <Route path="/output" element={<Mvp2 />} />
