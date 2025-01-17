@@ -1,0 +1,19 @@
+FROM python:3.10-slim
+
+# Poetry のインストール
+RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV PATH="/root/.local/bin:$PATH"
+
+# 作業ディレクトリの設定
+WORKDIR /backend
+
+# Poetry の設定と依存関係のインストール
+COPY pyproject.toml poetry.lock ./
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-dev
+
+# アプリケーションのコードをコピー
+COPY app ./app
+COPY src ./src
+COPY .env ./
+
