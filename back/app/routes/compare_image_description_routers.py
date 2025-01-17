@@ -1,3 +1,4 @@
+import base64
 from typing import Literal
 
 from fastapi import APIRouter, File, Form, UploadFile
@@ -16,8 +17,9 @@ async def compare_user_and_llm_image_description_response(
     user_description: str = Form(...),
 ):
     image_bytes = await image.read()
+    b64_image_data = base64.b64encode(image_bytes).decode("utf-8")
     messages = create_compare_messages(
-        image_bytes, mediatype, llm_description, user_description
+        b64_image_data, mediatype, llm_description, user_description
     )
     return StreamingResponse(
         openai_image_call(messages),

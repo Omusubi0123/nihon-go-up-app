@@ -61,4 +61,4 @@ if __name__ == "__main__":
 
     Fire(main)
 
-# poetry run python src/ai_search_main.py --index_name=doc_image_retrieval
+# poetry run python src/ai_search_main.py --index_name=dog_image_retrieval

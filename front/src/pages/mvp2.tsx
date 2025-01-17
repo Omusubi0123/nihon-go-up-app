@@ -11,7 +11,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Input,
   Textarea,
   Center,
   Image,
@@ -19,30 +18,6 @@ import {
 import ReactMarkdown from 'react-markdown';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-// const imagePaths = [
-//   'data/1.jpeg',
-//   'data/11.jpeg',
-//   'data/13.jpeg',
-//   'data/15.jpeg',
-//   'data/17.jpeg',
-//   'data/19.jpeg',
-//   'data/20.jpeg',
-//   'data/22.jpeg',
-//   'data/3.jpeg',
-//   'data/5.jpeg',
-//   'data/7.jpeg',
-//   'data/9.jpeg',
-//   'data/12.jpeg',
-//   'data/14.jpeg',
-//   'data/16.jpeg',
-//   'data/18.jpeg',
-//   'data/2.jpeg',
-//   'data/21.jpeg',
-//   'data/23.jpeg',
-//   'data/4.jpeg',
-//   'data/6.jpeg',
-//   'data/8.jpeg',
-// ];
 const imagePaths = [
     'data/1.jpeg',
     'data/2.jpeg',
@@ -140,7 +115,8 @@ export default function Mvp2() {
           method: "POST",
           body: formData,
         };
-        console.log("API呼び出し");
+        console.log("descript API呼び出し");
+        console.log(`mediatype: ${imageExtension}`);
         const response = await fetch(import.meta.env.VITE_FASTAPI_URL + 'descript/', requestOptions);
         console.log(response);
         const reader = response.body?.getReader();
@@ -508,7 +484,7 @@ export default function Mvp2() {
                 />
               </Box>
               <Text>
-                {index}
+                {index+1}
               </Text>
             </VStack>
             ))}

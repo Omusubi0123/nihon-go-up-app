@@ -29,6 +29,7 @@ def create_messages(
         prompt = OCR_IMAGE_PROMPT
     else:
         raise ValueError("mode must be 'descript' or 'ocr'")
+    print(f"ううう: {mediatype}")
     messages = [
         {
             "role": "user",
@@ -95,6 +96,7 @@ def openai_image_call(messages: list[dict[str, Any]]) -> Generator[str, None, No
     for chunk in response:
         content = chunk.choices[0].delta.content  # type: ignore
         if type(content) == str:
+            print(content, end="", flush=True)
             yield content
 
 

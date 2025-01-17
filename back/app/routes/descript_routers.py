@@ -1,3 +1,4 @@
+import base64
 from typing import Literal
 
 from fastapi import APIRouter, File, Form, UploadFile
@@ -14,7 +15,8 @@ async def descript_image_response(
     mediatype: Literal["jpeg", "png"] = Form(...),
 ):
     image_bytes = await image.read()
-    message = create_messages(image_bytes, mediatype, "descript")
+    b64_image_data = base64.b64encode(image_bytes).decode("utf-8")
+    message = create_messages(b64_image_data, mediatype, "descript")
     return StreamingResponse(
         openai_image_call(message),
         media_type="text/event-stream",
