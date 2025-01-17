@@ -1,21 +1,21 @@
 import base64
-import json
-from typing import Generator, Literal
+from typing import Any, Generator, Literal
 
-import boto3
+from openai import OpenAI
 
 from src.prompts.image_prompt import DESCRIPT_IMAGE_PROMPT, OCR_IMAGE_PROMPT
-from src.settings import Settings
+from src.settings import settings
+
+client = OpenAI(api_key=settings.openai_api_key)
 
 
 def local_image_to_data(image_path: str) -> str:
     with open(image_path, "rb") as f:
-        b64_image_data = base64.b64encode(f.read()).decode("utf-8")
-    return b64_image_data
+        return base64.b64encode(f.read()).decode("utf-8")
 
 
-def create_body(
-    image_bytes: bytes,
+def create_message(
+    b64_image_data: bytes,
     mediatype: Literal["jpeg", "png"],
     mode: Literal["descript", "ocr"],
 ) -> str:
@@ -26,56 +26,46 @@ def create_body(
     else:
         raise ValueError("mode must be 'descript' or 'ocr'")
     messages = [
-        {"role": "user", "content": [{"type": "text", "text": prompt}]},
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": prompt,
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/{mediatype};base64,{b64_image_data}"
+                    },
+                },
+            ],
+        },
     ]
-    messages[0]["content"].append(
-        {
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": f"image/{mediatype}",
-                "data": base64.b64encode(image_bytes).decode("utf-8"),
-            },
-        }
-    )
-    body = json.dumps(
-        {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 4000,
-            "temperature": 0.5,
-            "messages": messages,
-        }
-    )
-    return body
+    return messages
 
 
-def aws_bedrock_call(
-    body: str,
-) -> Generator[str, None, None]:
-    settings = Settings()
-    session = boto3.Session(profile_name=settings.aws_username)
-    client = session.client(service_name="bedrock-runtime", region_name="us-east-1")
-    response = client.invoke_model_with_response_stream(
-        modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
-        body=body,
+def openai_image_call(messages: list[dict[str, Any]]) -> Generator[str, None, None]:
+    response = client.chat.completions.create(
+        model=settings.openai_model,
+        messages=messages,
+        max_tokens=2000,
+        top_p=0.95,
+        frequency_penalty=0,
+        presence_penalty=0,
+        stop=None,
+        stream=True,
+        timeout=100,
     )
-    stream = response.get("body")
-    if stream:
-        for event in stream:
-            chunk = event.get("chunk")
-            if chunk:
-                data = json.loads(chunk.get("bytes").decode())
-                content = data.get("content_block", {}).get("text") or data.get(
-                    "delta", {}
-                ).get("text")
-                if content:
-                    yield content
+
+    for chunk in response:
+        content = chunk.choices[0].delta.content
+        if type(content) == str:
+            yield content
 
 
 if __name__ == "__main__":
-    import sys
-
     image_path = "data/kakudai.png"
     b64_image_data = local_image_to_data(image_path)
-    body = create_body(b64_image_data, "png", "ocr")
-    aws_bedrock_call(body)
+    messages = create_message(b64_image_data, "png", "ocr")
+    openai_image_call(messages)

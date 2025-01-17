@@ -1,104 +1,82 @@
+import ast
 import base64
 import json
-import sys
+from glob import glob
 from typing import Generator
 
-import boto3
+from openai import OpenAI
 
 from src.prompts.image_prompt import IMAGE_TO_TEXT_FOR_RAG_PROMPT
-from src.settings import Settings
+from src.settings import settings
+
+client = OpenAI(api_key=settings.openai_api_key)
 
 
 def local_image_to_data(image_path: str) -> bytes:
     with open(image_path, "rb") as f:
-        b64_image_data = base64.b64encode(f.read()).decode("utf-8")
-    return b64_image_data
+        return base64.b64encode(f.read()).decode("utf-8")
 
 
-def create_body(
+def create_message(
     b64_image_data: bytes,
 ) -> str:
     messages = [
         {
             "role": "user",
-            "content": [{"type": "text", "text": IMAGE_TO_TEXT_FOR_RAG_PROMPT}],
+            "content": [
+                {"type": "text", "text": IMAGE_TO_TEXT_FOR_RAG_PROMPT},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{b64_image_data}"},
+                },
+            ],
         },
     ]
-    messages[0]["content"].append(
-        {
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": f"image/jpeg",
-                "data": b64_image_data,
-            },
-        }
+    return messages
+
+
+def llm_process_image(b64_image_data: bytes) -> dict[str, str]:
+    response = client.chat.completions.create(
+        model=settings.openai_model,
+        messages=create_message(b64_image_data),
+        max_tokens=2000,
+        top_p=0.95,
+        frequency_penalty=0,
+        presence_penalty=0,
+        stop=None,
+        stream=True,
+        timeout=100,
+        response_format={"type": "json_object"},
     )
-    body = json.dumps(
-        {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 1000,
-            "temperature": 0.5,
-            "messages": messages,
-        }
-    )
-    return body
+
+    response_text = ""
+    for chunk in response:
+        content = chunk.choices[0].delta.content
+        if type(content) == str:
+            print(content, end="", flush=True)
+            response_text += content
+
+    return ast.literal_eval(response_text)
 
 
-def llm_process_image(
-    b64_image_data: bytes,
-) -> Generator[str, None, None]:
-    settings = Settings()
-    session = boto3.Session(profile_name=settings.aws_username)
-    client = session.client(service_name="bedrock-runtime", region_name="us-east-1")
-    response = client.invoke_model_with_response_stream(
-        modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
-        body=create_body(b64_image_data),
-    )
-    stream = response.get("body")
-    combined_text = ""
-    if stream:
-        for event in stream:
-            chunk = event.get("chunk")
-            if chunk:
-                data = json.loads(chunk.get("bytes").decode())
-                content = data.get("content_block", {}).get("text") or data.get(
-                    "delta", {}
-                ).get("text")
-                if content:
-                    combined_text += content
-                    print(content, end="")
-                    sys.stdout.flush()
-    return combined_text
-
-
-def main():
-    import ast
-    import json
-    from glob import glob
-
-    image_paths = glob("data/dog_use/*.jpeg")
-
+def main(
+    image_paths: str = glob("data/dog_use/*.jpeg"),
+    save_path: str = "data/filesearch/dog_use.json",
+):
     image_and_text = []
     for image_path in image_paths:
-        while True:
-            try:
-                print("\nprocessing image:", image_path)
-                b64_image_data = local_image_to_data(image_path)
-                response = llm_process_image(b64_image_data)
-                response_json = ast.literal_eval(response)
+        print("\nprocessing image:", image_path)
+        b64_image_data = local_image_to_data(image_path)
+        response_json = llm_process_image(b64_image_data)
 
-                image_and_text.append(
-                    {
-                        "title": response_json["title"],
-                        "content": response_json["detail"],
-                        "id": image_path.split("/")[-1].split(".")[0],
-                    }
-                )
-                break
-            except Exception as e:
-                print(e)
-    with open("data/filesearch/dog_use_100.json", "w") as f:
+        image_and_text.append(
+            {
+                "title": response_json["title"],
+                "content": response_json["detail"],
+                "id": image_path.split("/")[-1].split(".")[0],
+            }
+        )
+    with open(save_path, "w") as f:
         json.dump(image_and_text, f, indent=4, ensure_ascii=False)
 
 

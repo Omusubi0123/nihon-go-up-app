@@ -23,6 +23,7 @@ def main(
     """AI Searchのメイン処理
 
     Args:
+        index_name (str): Index名
         create (bool, optional): Indexを作成するか. Defaults to False.
         upload (bool, optional): Indexにドキュメントを追加するか. Defaults to False.
         search (bool, optional): AI searchの検索を行うか. Defaults to True.

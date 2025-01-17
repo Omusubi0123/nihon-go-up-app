@@ -24,6 +24,9 @@ IMAGE_TO_TEXT_FOR_RAG_PROMPT = """
 画像の状況を{"title": タイトル、"detail": 詳しい状況}というpythonの辞書形式で出力してください。
 titleでは、画像の状況を簡潔に表現し、
 detailでは、物体の色や形・状態に着目しながら100文字程度で表現してください。
+
+Output:
+{"title": タイトル, "detail": 詳しい状況}
 """
 
 COMPARE_IMAGE_DESCRIPTION_PROMPT = """
