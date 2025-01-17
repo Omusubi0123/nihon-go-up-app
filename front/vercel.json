@@ -1,6 +1,12 @@
 {
+    "redirects": [
+        {
+            "source": "/",
+            "destination": "/overview.html",
+            "permanent": true
+        }
+    ],
     "routes": [
-      { "src": "/", "dest": "/input" },
       { "src": "/input", "dest": "/index.html" },
       { "src": "/output", "dest": "/index.html" }
     ]
