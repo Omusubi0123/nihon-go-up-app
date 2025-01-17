@@ -2,7 +2,6 @@ import ast
 import base64
 import json
 from glob import glob
-from typing import Generator
 
 from openai import OpenAI
 
@@ -17,7 +16,7 @@ def local_image_to_data(image_path: str) -> bytes:
         return base64.b64encode(f.read()).decode("utf-8")
 
 
-def create_message(
+def create_messages(
     b64_image_data: bytes,
 ) -> str:
     messages = [
@@ -38,7 +37,7 @@ def create_message(
 def llm_process_image(b64_image_data: bytes) -> dict[str, str]:
     response = client.chat.completions.create(
         model=settings.openai_model,
-        messages=create_message(b64_image_data),
+        messages=create_messages(b64_image_data),
         max_tokens=2000,
         top_p=0.95,
         frequency_penalty=0,

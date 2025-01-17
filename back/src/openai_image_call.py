@@ -14,7 +14,7 @@ def local_image_to_data(image_path: str) -> str:
         return base64.b64encode(f.read()).decode("utf-8")
 
 
-def create_message(
+def create_messages(
     b64_image_data: bytes,
     mediatype: Literal["jpeg", "png"],
     mode: Literal["descript", "ocr"],
@@ -25,6 +25,40 @@ def create_message(
         prompt = OCR_IMAGE_PROMPT
     else:
         raise ValueError("mode must be 'descript' or 'ocr'")
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": prompt,
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/{mediatype};base64,{b64_image_data}"
+                    },
+                },
+            ],
+        },
+    ]
+    return messages
+
+
+from src.prompts.image_prompt import COMPARE_IMAGE_DESCRIPTION_PROMPT
+
+
+def create_compare_messages(
+    b64_image_data: bytes,
+    mediatype: Literal["jpeg", "png"],
+    llm_description: str,
+    user_description: str,
+) -> str:
+    prompt = COMPARE_IMAGE_DESCRIPTION_PROMPT.format(
+        llm_description=llm_description,
+        user_description=user_description,
+    )
+
     messages = [
         {
             "role": "user",
@@ -67,5 +101,5 @@ def openai_image_call(messages: list[dict[str, Any]]) -> Generator[str, None, No
 if __name__ == "__main__":
     image_path = "data/kakudai.png"
     b64_image_data = local_image_to_data(image_path)
-    messages = create_message(b64_image_data, "png", "ocr")
+    messages = create_messages(b64_image_data, "png", "ocr")
     openai_image_call(messages)
