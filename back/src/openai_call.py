@@ -2,14 +2,12 @@ from typing import Generator
 
 from openai import OpenAI
 
-from src.settings import Settings
+from src.settings import settings
+
+client = OpenAI(api_key=settings.openai_api_key)
 
 
 def openai_call(messages: list[dict]) -> Generator[str, None, None]:
-    settings = Settings()
-
-    client = OpenAI(api_key=settings.openai_api_key)
-
     response = client.chat.completions.create(
         model=settings.openai_model,
         messages=messages,
