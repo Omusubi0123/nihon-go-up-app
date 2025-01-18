@@ -10,7 +10,7 @@ services:
       - ./src:/backend/src
     ports:
       - "6000:6000" # ホストの port 8000 は別のサービスで使用しているため、6000 でアクセス
-    command: poetry run uvicorn app.main:app --host 0.0.0.0 --port 6000 --reload --forwarded-allow-ips="*"
+    command: poetry run uvicorn app.main:app --host 0.0.0.0 --port 6000 --forwarded-allow-ips="*"
     networks:
       - nihon-go-up-app_cloudflared_network
     depends_on:
